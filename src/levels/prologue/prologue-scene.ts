@@ -39,6 +39,9 @@ export class PrologueScene extends LevelScene {
   private pendingBeat: BeatId | null = null;
   private focus = new THREE.Vector3();
   kernSys!: KernSystems;
+  /** Итог боя с Дружинником: доиграл или добил, и заедание за главу. */
+  prologueResult: 'finish' | 'kill' | null = null;
+  prologueJam = 0;
   fx!: Fx;
   private druzhinnik: Npc | null = null;
   private nika: Npc | null = null;

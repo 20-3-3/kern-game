@@ -46,11 +46,18 @@ export class Physics implements Mover {
     this.controller.setMaxSlopeClimbAngle((50 * Math.PI) / 180);
   }
 
-  /** Статичный ящик. rotY — поворот вокруг вертикали. */
-  addBox(center: Vec3, half: Vec3, rotY = 0): void {
+  /** Статичный ящик. rotY — поворот вокруг вертикали. Возвращает номер для removeStatic. */
+  addBox(center: Vec3, half: Vec3, rotY = 0): number {
     const desc = RAPIER.ColliderDesc.cuboid(half.x, half.y, half.z).setTranslation(center.x, center.y, center.z);
     if (rotY) desc.setRotation({ x: 0, y: Math.sin(rotY / 2), z: 0, w: Math.cos(rotY / 2) });
     this.statics.push(this.world.createCollider(desc));
+    return this.statics.length - 1;
+  }
+
+  /** Убрать временную стену (например, барьер арены). */
+  removeStatic(index: number): void {
+    const c = this.statics[index];
+    if (c && c.isValid()) this.world.removeCollider(c, false);
   }
 
   addCylinder(center: Vec3, halfHeight: number, radius: number): void {
