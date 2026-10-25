@@ -42,6 +42,9 @@ export class PrologueScene extends LevelScene {
   /** Итог боя с Дружинником: доиграл или добил, и заедание за главу. */
   prologueResult: 'finish' | 'kill' | null = null;
   prologueJam = 0;
+  /** Когда добили запись (для 40-секундного перезапуска). */
+  killTime = 0;
+  private leaving = -1;
   fx!: Fx;
   private druzhinnik: Npc | null = null;
   private nika: Npc | null = null;
@@ -50,6 +53,8 @@ export class PrologueScene extends LevelScene {
     ctx: GameContext,
     private beats: Record<BeatId, BeatFactory>,
     private startBeat: BeatId = 'ride',
+    /** Что делать, когда уличная часть пролога закончилась (переход домой). */
+    private onStreetDone: () => void = () => undefined,
   ) {
     super(ctx);
     this.dialogue = new DialogueRunner({
@@ -128,7 +133,22 @@ export class PrologueScene extends LevelScene {
     this.dialogue.play(script, onDone);
   }
 
+  /** Уличная часть пройдена: затемнение и переход в следующую сцену. */
+  onPrologueStreetDone(): void {
+    if (this.leaving >= 0) return;
+    this.leaving = 0;
+    this.ui.fade(1, 2.5);
+  }
+
   protected tick(dt: number, f: InputFrame): void {
+    if (this.leaving >= 0) {
+      this.leaving += dt;
+      if (this.leaving > 4) {
+        this.leaving = -2;
+        this.onStreetDone();
+        return;
+      }
+    }
     if (this.pendingBeat) {
       const id = this.pendingBeat;
       this.pendingBeat = null;

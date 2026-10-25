@@ -112,13 +112,14 @@ export class UI {
   }
 
   /** Пуш приложения доставки. */
-  push(text: string): void {
+  push(text: string, app = 'ПОРОГ · доставка', seconds = 5.2): void {
     const p = el('push', this.pushesEl);
-    p.innerHTML = `<div class="push-app">ПОРОГ · доставка</div><div class="push-text"></div>`;
+    p.innerHTML = `<div class="push-app"></div><div class="push-text"></div>`;
+    (p.querySelector('.push-app') as HTMLElement).textContent = app;
     (p.querySelector('.push-text') as HTMLElement).textContent = text;
     requestAnimationFrame(() => p.classList.add('show'));
-    setTimeout(() => p.classList.remove('show'), 5200);
-    setTimeout(() => p.remove(), 5800);
+    setTimeout(() => p.classList.remove('show'), seconds * 1000);
+    setTimeout(() => p.remove(), seconds * 1000 + 600);
     while (this.pushesEl.children.length > 3) this.pushesEl.firstElementChild?.remove();
   }
 

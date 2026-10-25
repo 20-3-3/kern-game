@@ -406,6 +406,7 @@ export class BossBeat implements Beat {
     const s = this.s;
     const b = this.boss;
     this.phase = 'killed';
+    s.killTime = s.time;
     this.arena.clear();
     s.player.controllable = false;
     s.ui.keyPrompt(null);

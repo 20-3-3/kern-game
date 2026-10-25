@@ -287,3 +287,20 @@ export const instanced = (
   if (im.instanceColor) im.instanceColor.needsUpdate = true;
   return im;
 };
+
+/** Надпись маркером на картоне (коробка деда и т. п.). */
+export const makeLabelTexture = (text: string): THREE.Texture => {
+  const c = document.createElement('canvas');
+  c.width = 512;
+  c.height = 120;
+  const g = c.getContext('2d')!;
+  g.clearRect(0, 0, 512, 120);
+  g.font = 'bold 54px sans-serif';
+  g.fillStyle = '#1a1a1a';
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.fillText(text, 256, 64, 490);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+};

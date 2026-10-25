@@ -8,6 +8,8 @@ import type { FixedLoop } from './loop';
 import type { SceneManager } from './scene';
 import type { UI } from '../ui/ui';
 import type { Hud } from '../ui/hud';
+import type { SaveStore } from './save';
+import type { ProgressState } from '../systems/progress';
 
 export interface Settings {
   mouseSensitivity: number;
@@ -28,4 +30,7 @@ export interface GameContext {
   settings: Settings;
   ui: UI;
   hud: Hud;
+  save: SaveStore;
+  /** Текущее прохождение (сохраняется в конце глав). */
+  progress: ProgressState;
 }

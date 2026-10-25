@@ -14,6 +14,7 @@ import { DEFAULT_MOUSE_SENSITIVITY } from './data/controls';
 import { UI } from './ui/ui';
 import { HumorLayer } from './ui/humor';
 import { Hud } from './ui/hud';
+import { SaveStore } from './core/save';
 
 const boot = async () => {
   const canvas = document.getElementById('game') as HTMLCanvasElement;
@@ -21,6 +22,7 @@ const boot = async () => {
   const uiRoot = document.getElementById('ui') as HTMLDivElement;
   const hud = new Hud(uiRoot);
   const ui = new UI(uiRoot);
+  const save = new SaveStore();
   await initRapier();
 
   const renderer = new Renderer(canvas);
@@ -43,6 +45,8 @@ const boot = async () => {
     scenes,
     ui,
     hud,
+    save,
+    progress: save.loadProgress(),
     settings: {
       mouseSensitivity: DEFAULT_MOUSE_SENSITIVITY,
       invertY: false,
@@ -57,7 +61,11 @@ const boot = async () => {
   // Отладка: ?debug открывает доступ к контексту из консоли браузера.
   if (new URLSearchParams(location.search).has('debug')) (window as unknown as { kern: GameContext }).kern = ctx;
   const params = new URLSearchParams(location.search);
-  await scenes.switchTo(createPrologue(ctx, (params.get('beat') as BeatId | null) ?? 'ride'));
+  const onFinished = () => {
+    ctx.progress.completed = [...new Set([...ctx.progress.completed, 'prologue'])];
+    save.saveProgress(ctx.progress);
+  };
+  await scenes.switchTo(createPrologue(ctx, { onFinished }, (params.get('beat') as BeatId | 'home' | null) ?? 'ride'));
   loop.start();
 };
 
