@@ -15,6 +15,8 @@ import type { Voice } from '../audio/voice';
 
 export interface Settings {
   mouseSensitivity: number;
+  /** Чувствительность камеры при свайпе пальцем (множитель). */
+  touchSensitivity: number;
   invertY: boolean;
   masterVolume: number;
   musicVolume: number;

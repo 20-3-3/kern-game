@@ -36,6 +36,21 @@ export class Voice {
     }
   }
 
+  private primed = false;
+
+  /** iPhone разрешает синтез речи, только если первая фраза запущена касанием. */
+  prime(): void {
+    if (this.primed) return;
+    this.primed = true;
+    try {
+      const u = new SpeechSynthesisUtterance(' ');
+      u.volume = 0;
+      window.speechSynthesis?.speak(u);
+    } catch {
+      // Нет синтеза речи — ничего страшного.
+    }
+  }
+
   get hasSpeech(): boolean {
     return !!this.ru;
   }

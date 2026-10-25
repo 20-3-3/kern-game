@@ -1,6 +1,6 @@
 // Главное меню, пауза, настройки и управление — обычный HTML поверх canvas.
 
-import { CONTROLS_TEXT, MENU_TEXT, SETTINGS_TEXT } from '../data/text/ui';
+import { CONTROLS_TEXT, CONTROLS_TOUCH_TEXT, MENU_TEXT, SETTINGS_TEXT } from '../data/text/ui';
 import type { Settings } from '../core/context';
 
 export interface MenuActions {
@@ -32,6 +32,7 @@ export class Menu {
     private settings: Settings,
     private actions: MenuActions,
     private click: () => void,
+    private isTouch: () => boolean = () => false,
   ) {
     this.root = h('div', 'menu');
     this.panel = h('div', 'menu-panel');
@@ -78,7 +79,7 @@ export class Menu {
     list.appendChild(this.button(MENU_TEXT.settings, () => this.showSettings(() => this.showMain())));
     list.appendChild(this.button(MENU_TEXT.controls, () => this.showControls(() => this.showMain())));
     p.appendChild(list);
-    p.appendChild(h('div', 'menu-footer', MENU_TEXT.footer));
+    p.appendChild(h('div', 'menu-footer', this.isTouch() ? MENU_TEXT.footerTouch : MENU_TEXT.footer));
   }
 
   private confirmNew(): void {
@@ -112,7 +113,7 @@ export class Menu {
     p.innerHTML = '';
     p.appendChild(h('div', 'menu-title small', MENU_TEXT.controls));
     const t = h('table', 'menu-controls');
-    for (const [a, k] of CONTROLS_TEXT) {
+    for (const [a, k] of this.isTouch() ? CONTROLS_TOUCH_TEXT : CONTROLS_TEXT) {
       const tr = document.createElement('tr');
       tr.appendChild(h('td', '', a));
       tr.appendChild(h('td', 'keys', k));
@@ -158,7 +159,8 @@ export class Menu {
       row.appendChild(inp);
       form.appendChild(row);
     };
-    slider(SETTINGS_TEXT.sensitivity, s.mouseSensitivity, 0.0008, 0.006, 0.0002, (v) => (s.mouseSensitivity = v));
+    if (this.isTouch()) slider(SETTINGS_TEXT.touchSensitivity, s.touchSensitivity, 0.3, 2.5, 0.1, (v) => (s.touchSensitivity = v));
+    else slider(SETTINGS_TEXT.sensitivity, s.mouseSensitivity, 0.0008, 0.006, 0.0002, (v) => (s.mouseSensitivity = v));
     check(SETTINGS_TEXT.invertY, s.invertY, (v) => (s.invertY = v));
     slider(SETTINGS_TEXT.master, s.masterVolume, 0, 1, 0.05, (v) => (s.masterVolume = v));
     slider(SETTINGS_TEXT.music, s.musicVolume, 0, 1, 0.05, (v) => (s.musicVolume = v));

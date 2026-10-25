@@ -13,6 +13,8 @@ import { NIKA } from '../../data/characters';
 import { HOME_KILL_ECHO, HOME_TEXT, SCRIPT_CASSETTE, SCRIPT_HOME_ENTER, VETROV_LETTER } from '../../data/text/prologue';
 import { DRUZHINNIK_BOSS } from '../../data/bosses/druzhinnik';
 import { groundTexture, makeLabelTexture } from '../../render/world-kit';
+import type { TouchLayout } from '../../core/scene';
+import { TOUCH_TEXT } from '../../data/text/ui';
 
 type Phase = 'enter' | 'explore' | 'cassette' | 'outro';
 
@@ -204,6 +206,14 @@ export class HomeScene extends LevelScene {
       this.ctx.bus.emit('sfx', { id: 'cassetteStop' });
     }
     if (name === 'letter') ui.push(VETROV_LETTER, 'ПОЧТА · фонд «Хранилище»', 9);
+  }
+
+  override touchLayout(): TouchLayout {
+    const explore = this.phase === 'explore';
+    const buttons: TouchLayout['buttons'] = [];
+    if (explore && this.near(BOX_POS, 1.6)) buttons.push({ action: 'attack', label: TOUCH_TEXT.open, hot: true });
+    if (this.dialogue.active) buttons.push({ action: 'confirm', label: TOUCH_TEXT.confirm });
+    return { move: explore, look: true, buttons };
   }
 
   private near(p: Vec3, d: number): boolean {

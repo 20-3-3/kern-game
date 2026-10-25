@@ -23,6 +23,8 @@ import { FighterView } from '../enemies/view';
 import { DEFENSE } from '../data/combat';
 import { PLAYER } from '../data/balance';
 import type { LevelScene } from '../levels/level-scene';
+import type { TouchButton } from '../core/scene';
+import { TOUCH_TEXT } from '../data/text/ui';
 
 export class Arena {
   fighters: Fighter[] = [];
@@ -222,6 +224,25 @@ export class Arena {
         break;
     }
     return result;
+  }
+
+  /** Кнопки боя на телефоне. accordFull — полна ли шкала Аккорда (null — бой без керна). */
+  touchButtons(accordFull: boolean | null): TouchButton[] {
+    const T = TOUCH_TEXT;
+    const b: TouchButton[] = [
+      { action: 'attack', label: T.attack },
+      { action: 'block', label: T.block },
+      { action: 'dash', label: T.dash },
+      { action: 'lock', label: T.lock, hot: this.lock.target !== null },
+    ];
+    if (this.lock.target !== null) b.push({ action: 'lockNext', label: T.lockNext });
+    if (this.combat.mode === 'bag') {
+      const can = this.fighters.some((f) => isAlive(f) && isThrowable(f));
+      b.push({ action: 'accord', label: T.throw, hot: can, dim: !can });
+    } else if (accordFull !== null) {
+      b.push({ action: 'accord', label: T.accord, hot: accordFull, dim: !accordFull });
+    }
+    return b;
   }
 
   /** Лёва замирает на время сильного приёма. */

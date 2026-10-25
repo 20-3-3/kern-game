@@ -28,6 +28,8 @@ import {
   TAIL_TEXT,
 } from '../../../data/text/prologue';
 import type { PlayerHit } from '../../../combat/player-combat';
+import type { TouchLayout } from '../../../core/scene';
+import { TOUCH_TEXT } from '../../../data/text/ui';
 
 const BOSS_TARGET_ID = 900;
 
@@ -253,6 +255,19 @@ export class BossBeat implements Beat {
           break;
       }
     }
+  }
+
+  touchLayout(): TouchLayout {
+    const s = this.s;
+    if (this.phase !== 'fight') return { move: false, look: true, buttons: [] };
+    const full = s.kernSys.accord.full;
+    const buttons = this.arena.touchButtons(full);
+    const l = this.loud;
+    const wait = Math.ceil(l.silenced ? l.silenceTime : l.silenceCooldown);
+    buttons.push({ action: 'silence', label: l.silenceReady ? TOUCH_TEXT.silence : `${TOUCH_TEXT.silence} ${wait}`, dim: !l.silenceReady });
+    // «Нота» появляется только в момент обрыва — тогда же выбор «доиграть или добить».
+    if (this.boss.inCutoff) buttons.push({ action: 'lastNote', label: TOUCH_TEXT.lastNote, hot: full, dim: !full });
+    return { move: true, look: true, buttons };
   }
 
   update(dt: number, raw: InputFrame): void {

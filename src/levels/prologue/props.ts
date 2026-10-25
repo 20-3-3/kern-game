@@ -3,8 +3,16 @@
 import * as THREE from 'three';
 import type { ObstacleKind } from '../../data/levels/prologue-ride';
 
-const std = (color: number, extra: Partial<THREE.MeshStandardMaterialParameters> = {}) =>
-  new THREE.MeshStandardMaterial({ color, roughness: 0.7, flatShading: true, ...extra });
+// Одинаковые материалы переиспользуются: тогда части предмета сливаются в один меш.
+const matCache = new Map<string, THREE.MeshStandardMaterial>();
+const std = (color: number, extra: Partial<THREE.MeshStandardMaterialParameters> = {}) => {
+  const key = extra.map ? '' : `${color}:${JSON.stringify(extra)}`;
+  const hit = key ? matCache.get(key) : undefined;
+  if (hit) return hit;
+  const m = new THREE.MeshStandardMaterial({ color, roughness: 0.7, flatShading: true, ...extra });
+  if (key) matCache.set(key, m);
+  return m;
+};
 
 const add = (g: THREE.Object3D, geo: THREE.BufferGeometry, mat: THREE.Material, x: number, y: number, z: number) => {
   const m = new THREE.Mesh(geo, mat);

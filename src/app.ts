@@ -16,7 +16,10 @@ export class App {
   inGame = false;
   private pausedAt = 0;
 
-  constructor(private ctx: GameContext) {
+  constructor(
+    private ctx: GameContext,
+    private isTouch: () => boolean = () => false,
+  ) {
     this.menu = new Menu(
       ctx.ui.root,
       ctx.settings,
@@ -29,7 +32,12 @@ export class App {
         settingsChanged: (s) => this.applySettings(s),
       },
       () => ctx.audio.play('uiClick'),
+      () => this.isTouch(),
     );
+    // Свернули браузер или пришёл звонок — пауза.
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) this.pause();
+    });
     ctx.input.onPause = () => {
       // Esc мог уже поставить паузу через снятие захвата мыши.
       if (performance.now() - this.pausedAt < 400) return;

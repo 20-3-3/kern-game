@@ -37,7 +37,10 @@ export const buildCity = (scene: THREE.Scene, physics: Physics, lights = 5): Cit
 
   scene.background = new THREE.Color(MAP.sky.horizon);
   scene.fog = new THREE.FogExp2(MAP.fog.color, MAP.fog.density);
-  root.add(skyDome(MAP.sky.top, MAP.sky.horizon));
+  // Небо едет вместе с камерой: так его можно сделать маленьким и не рисовать город за туманом.
+  const sky = skyDome(MAP.sky.top, MAP.sky.horizon);
+  sky.scale.setScalar(MAP.viewDistance / 460);
+  root.add(sky);
 
   // Свет: небо, луна и пул фонарей.
   root.add(new THREE.HemisphereLight(0x4a5c80, 0x14100c, 1.3));
@@ -305,6 +308,7 @@ export const buildCity = (scene: THREE.Scene, physics: Physics, lights = 5): Cit
     root,
     update(focus, t) {
       pool.update(focus);
+      sky.position.set(focus.x, 0, focus.z);
       // Одна вывеска «подмигивает», как старая неоновая трубка.
       const flick = signs[3];
       if (flick) (flick.material as THREE.MeshBasicMaterial).opacity = Math.sin(t * 13) > 0.85 || Math.sin(t * 3.1) > 0.97 ? 0.3 : 1;

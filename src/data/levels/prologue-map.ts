@@ -15,6 +15,8 @@ export const MAP = {
   lampSpacing: 28,
   treeSpacing: 14,
   fog: { color: 0x0e1828, density: 0.012 },
+  /** Дальше этого камера не рисует: туман там уже сплошной (важно для телефонов). */
+  viewDistance: 240,
   sky: { top: 0x02040a, horizon: 0x1b2740 },
 };
 

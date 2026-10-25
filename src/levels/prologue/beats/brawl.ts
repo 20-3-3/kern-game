@@ -10,6 +10,7 @@ import { RIDE } from '../../../data/levels/prologue-ride';
 import { BRAWL_BARKS, BRAWL_HINTS, BRAWL_LINES, SCRIPT_SUMMON } from '../../../data/text/prologue';
 import { isAlive, type Fighter } from '../../../enemies/fighter';
 import { MAP } from '../../../data/levels/prologue-map';
+import type { TouchLayout } from '../../../core/scene';
 
 type Phase = 'fight' | 'down' | 'summon';
 
@@ -164,6 +165,11 @@ export class BrawlBeat implements Beat {
     if (name === 'restorersFlee') {
       s.ui.fade(1, 1);
     }
+  }
+
+  touchLayout(): TouchLayout {
+    const fight = this.phase === 'fight';
+    return { move: fight || this.phase === 'down', look: true, buttons: fight ? this.arena.touchButtons(null) : [] };
   }
 
   update(dt: number, f: InputFrame): void {

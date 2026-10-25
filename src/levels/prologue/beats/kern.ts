@@ -9,6 +9,7 @@ import { Arena } from '../../../combat/arena';
 import { KERN_BARKS, KERN_HINTS, KERN_OBJECTIVES, SCRIPT_MEET, SCRIPT_NIKA } from '../../../data/text/prologue';
 import { PROLOGUE_ARENA } from '../../../data/levels/prologue-arena';
 import { KernCombat } from '../kern-combat';
+import type { TouchLayout } from '../../../core/scene';
 
 type Phase = 'approach' | 'meet' | 'wave' | 'nika' | 'down' | 'done';
 
@@ -136,6 +137,16 @@ export class KernBeat implements Beat {
       s.ui.hint(null);
       s.goTo('boss');
     }
+  }
+
+  touchLayout(): TouchLayout {
+    const s = this.s;
+    const wave = this.phase === 'wave';
+    return {
+      move: s.player.controllable && (wave || this.phase === 'approach'),
+      look: true,
+      buttons: wave ? this.arena.touchButtons(s.kernSys.accord.full) : [],
+    };
   }
 
   update(dt: number, f: InputFrame): void {

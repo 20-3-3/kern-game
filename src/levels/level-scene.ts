@@ -2,7 +2,7 @@
 // и добавляют своё окружение, врагов и сюжет.
 
 import * as THREE from 'three';
-import type { GameScene } from '../core/scene';
+import type { GameScene, TouchLayout } from '../core/scene';
 import type { InputFrame } from '../core/input';
 import type { GameContext } from '../core/context';
 import { Physics } from '../core/physics';
@@ -10,7 +10,7 @@ import { createPlayerState, PlayerController, type LocomotionOptions, type Playe
 import { PlayerView } from '../player/view';
 import { CameraRig } from '../player/camera';
 import { PLAYER, CAMERA } from '../data/balance';
-import { lerp, vec3, type Vec3 } from '../core/math';
+import { dampAngle, lerp, vec3, type Vec3 } from '../core/math';
 import { Fx } from '../render/fx';
 
 export abstract class LevelScene implements GameScene {
@@ -50,6 +50,7 @@ export abstract class LevelScene implements GameScene {
     this.cam = new CameraRig(this.ctx.settings.mouseSensitivity);
     this.cam.yaw = sp.yaw;
     this.ctx.renderer.camera.fov = CAMERA.fov;
+    this.ctx.renderer.camera.far = 600;
     this.ctx.renderer.camera.updateProjectionMatrix();
     this.physics.step();
   }
@@ -68,6 +69,20 @@ export abstract class LevelScene implements GameScene {
   movePlayer(dt: number, f: InputFrame, lockTarget: Vec3 | null, opt: Omit<LocomotionOptions, 'camYaw'> = {}): void {
     this.controller.update(dt, f, { camYaw: this.cam.yaw, ...opt });
     this.cam.update(dt, f.lookX, f.lookY, this.player.pos, lockTarget);
+    // На телефоне одной рукой и бить, и крутить камеру неудобно:
+    // если палец не трогает камеру, она сама плавно заходит за спину на бегу.
+    this.lookIdle = f.lookX || f.lookY ? 0 : this.lookIdle + dt;
+    const p = this.player;
+    if (this.ctx.input.touchMode && !lockTarget && this.lookIdle > 0.7 && p.groundSpeed > 1.5 && p.action === 'run') {
+      this.cam.yaw = dampAngle(this.cam.yaw, p.yaw, 1.1, dt);
+    }
+  }
+
+  private lookIdle = 0;
+
+  /** Экранное управление по умолчанию: ходить можно, кнопок нет. */
+  touchLayout(): TouchLayout {
+    return { move: this.player?.controllable ?? false, look: true, buttons: [] };
   }
 
   interpPlayer(alpha: number): Vec3 {

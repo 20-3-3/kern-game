@@ -14,6 +14,8 @@ import { DRUZHINNIK, NIKA } from '../../data/characters';
 import { RIDE } from '../../data/levels/prologue-ride';
 import { DialogueRunner, type Script } from '../../dialogue/engine';
 import type { GameContext } from '../../core/context';
+import type { TouchLayout } from '../../core/scene';
+import { TOUCH_TEXT } from '../../data/text/ui';
 import { KernSystems } from '../../systems/kern-systems';
 
 export interface Beat {
@@ -23,6 +25,8 @@ export interface Beat {
   exit(): void;
   /** Сюжетная метка из диалога. */
   onCue?(name: string): void;
+  /** Экранные кнопки на телефоне для этого отрезка. */
+  touchLayout?(): TouchLayout;
 }
 
 export type BeatId = 'ride' | 'brawl' | 'kern' | 'boss' | 'aftermath';
@@ -110,6 +114,8 @@ export class PrologueScene extends LevelScene {
 
   override async load(): Promise<void> {
     await super.load();
+    this.ctx.renderer.camera.far = MAP.viewDistance;
+    this.ctx.renderer.camera.updateProjectionMatrix();
     this.kernSys = new KernSystems(this.ctx.bus, () => this.player.id);
     this.setBeat(this.startBeat);
   }
@@ -130,6 +136,14 @@ export class PrologueScene extends LevelScene {
   /** Проиграть диалог; confirm (Пробел/Enter) или ЛКМ пропускают реплику. */
   play(script: Script, onDone?: () => void): void {
     this.dialogue.play(script, onDone);
+  }
+
+  override touchLayout(): TouchLayout {
+    const base = this.beat?.touchLayout?.() ?? super.touchLayout();
+    if (!this.player.controllable) base.move = false;
+    // Реплику можно пропустить кнопкой «Дальше».
+    if (this.dialogue.active && !this.dialogue.awaitingChoice) base.buttons = [...base.buttons, { action: 'confirm', label: TOUCH_TEXT.confirm }];
+    return base;
   }
 
   /** Уличная часть пройдена: затемнение и переход в следующую сцену. */

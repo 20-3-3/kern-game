@@ -29,6 +29,13 @@ export class AudioEngine {
 
   /** Браузер разрешает звук только после действия игрока: вызывать на клик/клавишу. */
   unlock(): void {
+    // iPhone: звук игры идёт и при включённом беззвучном режиме (iOS 17+).
+    try {
+      const nav = navigator as Navigator & { audioSession?: { type: string } };
+      if (nav.audioSession && nav.audioSession.type !== 'playback') nav.audioSession.type = 'playback';
+    } catch {
+      // Старые браузеры — без этого.
+    }
     if (this.ac) {
       if (this.ac.state === 'suspended') void this.ac.resume();
       return;
@@ -37,6 +44,17 @@ export class AudioEngine {
     if (!AC) return;
     const ac = new AC({ latencyHint: 'interactive' });
     this.ac = ac;
+    // Старый приём для iOS: короткий тихий звук «будит» аудио после касания.
+    try {
+      const b = ac.createBuffer(1, 1, 22050);
+      const src = ac.createBufferSource();
+      src.buffer = b;
+      src.connect(ac.destination);
+      src.start(0);
+      if (ac.state === 'suspended') void ac.resume();
+    } catch {
+      // ничего
+    }
     this.master = ac.createGain();
     this.master.gain.value = this.volumes.master;
     const comp = ac.createDynamicsCompressor();

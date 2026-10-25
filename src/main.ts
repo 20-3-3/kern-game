@@ -19,9 +19,13 @@ import { AdaptiveMusic } from './audio/music';
 import { AudioReactions } from './audio/reactions';
 import { Voice } from './audio/voice';
 import { App } from './app';
+import { TouchControls } from './ui/touch';
+import { setKeyAlias } from './ui/ui';
+import { TOUCH_KEY_ALIASES } from './data/text/ui';
 
 const DEFAULT_SETTINGS: Settings = {
   mouseSensitivity: DEFAULT_MOUSE_SENSITIVITY,
+  touchSensitivity: 1,
   invertY: false,
   masterVolume: 0.8,
   musicVolume: 0.7,
@@ -45,16 +49,22 @@ const boot = async () => {
   const voice = new Voice(audio);
   const reactions = new AudioReactions(bus, audio, music);
   ui.onLine = (speaker, text) => voice.say(speaker, text);
-  // Браузер разрешает звук только после действия игрока.
-  const unlock = () => audio.unlock();
-  window.addEventListener('pointerdown', unlock);
-  window.addEventListener('keydown', unlock);
+  // Браузер разрешает звук только после действия игрока (на iPhone — после касания).
+  const unlock = () => {
+    audio.unlock();
+    voice.prime();
+  };
+  for (const ev of ['pointerdown', 'touchend', 'click', 'keydown']) window.addEventListener(ev, unlock, { passive: true });
+  // iOS: не даём странице масштабироваться жестами и двойным касанием.
+  document.addEventListener('gesturestart', (e) => e.preventDefault());
+  document.addEventListener('dblclick', (e) => e.preventDefault());
   await initRapier();
 
   const renderer = new Renderer(canvas);
   const input = new Input(canvas);
   const scenes = new SceneManager((on) => loadingEl.classList.toggle('hidden', !on));
   let app: App | null = null;
+  let touchRef: TouchControls | null = null;
   const fpsEl = debug ? Object.assign(document.createElement('div'), { className: 'fps' }) : null;
   if (fpsEl) uiRoot.appendChild(fpsEl);
   let frames = 0;
@@ -66,6 +76,7 @@ const boot = async () => {
     },
     render: (alpha, frameDt) => {
       scenes.render(alpha, frameDt);
+      touchRef?.setLayout(app && app.inGame && !app.paused && !scenes.loading ? (scenes.current?.touchLayout?.() ?? null) : null);
       ui.tick(frameDt);
       reactions.update(frameDt);
       if (fpsEl) {
@@ -97,7 +108,26 @@ const boot = async () => {
   // Отладка: ?debug открывает доступ к контексту из консоли браузера.
   if (debug) (window as unknown as { kern: GameContext }).kern = ctx;
 
-  app = new App(ctx);
+  // Телефон или планшет: экранный пульт. Включается и по первому касанию (ноутбуки с сенсором).
+  const touch = new TouchControls(uiRoot, input, ctx.settings, () => app?.togglePause());
+  const isTouchDevice = matchMedia('(pointer: coarse)').matches || (navigator.maxTouchPoints > 0 && !matchMedia('(pointer: fine)').matches);
+  touch.setEnabled(isTouchDevice);
+  window.addEventListener(
+    'touchstart',
+    () => {
+      if (!touch.enabled) touch.setEnabled(true);
+    },
+    { passive: true },
+  );
+  touchRef = touch;
+  setKeyAlias((text) => {
+    if (!touch.enabled) return text;
+    let t = text;
+    for (const [from, to] of TOUCH_KEY_ALIASES) t = t.split(from).join(to.replace('{accord}', touch.accordLabel));
+    return t;
+  });
+
+  app = new App(ctx, () => touch.enabled);
   loop.start();
   // ?beat=boss — сразу к нужному отрезку пролога (для проверки).
   const beat = params.get('beat') as BeatId | 'home' | null;

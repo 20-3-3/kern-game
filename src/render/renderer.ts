@@ -19,6 +19,9 @@ export class Renderer {
     this.camera = new THREE.PerspectiveCamera(62, 1, 0.1, 600);
     this.resize();
     window.addEventListener('resize', () => this.resize());
+    // iPhone при повороте сообщает новый размер не сразу — пересчитываем ещё раз чуть позже.
+    window.addEventListener('orientationchange', () => setTimeout(() => this.resize(), 250));
+    window.visualViewport?.addEventListener('resize', () => this.resize());
   }
 
   resize(): void {

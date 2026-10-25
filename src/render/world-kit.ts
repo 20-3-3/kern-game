@@ -304,3 +304,37 @@ export const makeLabelTexture = (text: string): THREE.Texture => {
   t.colorSpace = THREE.SRGBColorSpace;
   return t;
 };
+
+/**
+ * Слить неподвижные части группы в один меш на материал (меньше вызовов отрисовки).
+ * Части с именем (мигающие лампы и т. п.) остаются отдельными.
+ */
+export const mergeStaticGroup = (group: THREE.Object3D): void => {
+  group.updateMatrixWorld(true);
+  const inv = new THREE.Matrix4().copy(group.matrixWorld).invert();
+  const byMat = new Map<THREE.Material, THREE.BufferGeometry[]>();
+  const remove: THREE.Mesh[] = [];
+  group.traverse((o) => {
+    const m = o as THREE.Mesh;
+    if (!m.isMesh || m.name || Array.isArray(m.material)) return;
+    const g = m.geometry.clone();
+    g.applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv, m.matrixWorld));
+    // Для слияния нужны одинаковые наборы атрибутов.
+    if (g.index) {
+      const ng = g.toNonIndexed();
+      g.dispose();
+      for (const k of Object.keys(ng.attributes)) if (k !== 'position' && k !== 'normal' && k !== 'uv') ng.deleteAttribute(k);
+      byMat.set(m.material, [...(byMat.get(m.material) ?? []), ng]);
+    } else {
+      for (const k of Object.keys(g.attributes)) if (k !== 'position' && k !== 'normal' && k !== 'uv') g.deleteAttribute(k);
+      byMat.set(m.material, [...(byMat.get(m.material) ?? []), g]);
+    }
+    remove.push(m);
+  });
+  for (const m of remove) m.removeFromParent();
+  for (const [mat, geos] of byMat) {
+    const merged = mergeGeometries(geos, false);
+    geos.forEach((g) => g.dispose());
+    if (merged) group.add(new THREE.Mesh(merged, mat));
+  }
+};

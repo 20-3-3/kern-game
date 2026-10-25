@@ -27,6 +27,10 @@ export class Input {
   private pressed = 0;
   private lookX = 0;
   private lookY = 0;
+  /** Сенсорное управление: джойстик и удерживаемые кнопки на экране. */
+  private touchMoveX = 0;
+  private touchMoveY = 0;
+  private touchHeld = 0;
   /** Колбэк для паузы: срабатывает сразу, даже если логика стоит. */
   onPause: (() => void) | null = null;
   /** Колбэк для любого нажатия (используется меню и диалогами). */
@@ -37,7 +41,8 @@ export class Input {
     window.addEventListener('keydown', this.onKeyDown);
     window.addEventListener('keyup', this.onKeyUp);
     window.addEventListener('blur', this.releaseAll);
-    canvas.addEventListener('mousedown', this.onMouseDown);
+    // Мышь слушаем на всём окне: поверх canvas может лежать экранный пульт.
+    window.addEventListener('mousedown', this.onMouseDown);
     window.addEventListener('mouseup', this.onMouseUp);
     window.addEventListener('mousemove', this.onMouseMove);
     canvas.addEventListener('wheel', this.onWheel, { passive: false });
@@ -48,8 +53,11 @@ export class Input {
     return document.pointerLockElement === this.canvas;
   }
 
+  /** Захват мыши бессмыслен на сенсорных экранах (на iPhone его и нет). */
+  touchMode = false;
+
   requestPointerLock(): void {
-    if (this.pointerLocked) return;
+    if (this.pointerLocked || this.touchMode || typeof this.canvas.requestPointerLock !== 'function') return;
     try {
       const r = this.canvas.requestPointerLock() as unknown;
       if (r instanceof Promise) r.catch(() => undefined);
@@ -68,6 +76,11 @@ export class Input {
     const any = (codes: string[]) => codes.some((c) => k.has(c));
     let mx = (any(MOVE_KEYS.right) ? 1 : 0) - (any(MOVE_KEYS.left) ? 1 : 0);
     let my = (any(MOVE_KEYS.forward) ? 1 : 0) - (any(MOVE_KEYS.back) ? 1 : 0);
+    // Если клавиатура молчит — движение берётся с экранного джойстика.
+    if (mx === 0 && my === 0) {
+      mx = this.touchMoveX;
+      my = this.touchMoveY;
+    }
     const len = Math.hypot(mx, my);
     if (len > 1) {
       mx /= len;
@@ -78,13 +91,45 @@ export class Input {
       my: this.enabled ? my : 0,
       lookX: this.enabled ? this.lookX : 0,
       lookY: this.enabled ? this.lookY : 0,
-      held: this.enabled ? this.held : 0,
+      held: this.enabled ? this.held | this.touchHeld : 0,
       pressed: this.enabled ? this.pressed : 0,
     };
     this.pressed = 0;
     this.lookX = 0;
     this.lookY = 0;
     return frame;
+  }
+
+  /** Экранный джойстик: x — вправо, y — вперёд, -1..1. */
+  setTouchMove(x: number, y: number): void {
+    this.touchMoveX = x;
+    this.touchMoveY = y;
+  }
+
+  /** Поворот камеры пальцем (в «пикселях мыши»). */
+  addLook(dx: number, dy: number): void {
+    this.lookX += dx;
+    this.lookY += dy;
+  }
+
+  /** Экранная кнопка нажата. */
+  touchDown(action: Action): void {
+    const bit = ACTION_BIT[action];
+    if ((this.touchHeld & bit) === 0 && (this.held & bit) === 0) this.pressed |= bit;
+    this.touchHeld |= bit;
+    if (action === 'pause') this.onPause?.();
+    this.onAnyAction?.(action);
+  }
+
+  touchUp(action: Action): void {
+    this.touchHeld &= ~ACTION_BIT[action];
+  }
+
+  /** Отпустить всё сенсорное (смена сцены, пауза). */
+  touchReset(): void {
+    this.touchHeld = 0;
+    this.touchMoveX = 0;
+    this.touchMoveY = 0;
   }
 
   private press(code: string): void {
@@ -118,6 +163,8 @@ export class Input {
   };
 
   private onMouseDown = (e: MouseEvent) => {
+    // Клики по меню и кнопкам выбора — не удары.
+    if ((e.target as HTMLElement | null)?.closest?.('button, .menu, .choice, .tbtn')) return;
     const code = `Mouse${e.button}`;
     this.keys.add(code);
     this.press(code);

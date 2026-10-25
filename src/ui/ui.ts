@@ -248,9 +248,15 @@ export class UI {
   }
 }
 
+/** На телефоне клавиши в подсказках заменяются названиями экранных кнопок. */
+let keyAlias: ((text: string) => string) | null = null;
+export const setKeyAlias = (fn: ((text: string) => string) | null): void => {
+  keyAlias = fn;
+};
+
 /** «[Shift] — рывок» → клавиша в рамке. */
 export const formatKeys = (text: string): string =>
-  text
+  (keyAlias ? keyAlias(text) : text)
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/\[([^\]]+)\]/g, '<kbd>$1</kbd>');

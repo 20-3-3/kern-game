@@ -2,6 +2,24 @@
 // Новые главы добавляются как новые сцены без правки систем.
 
 import type { InputFrame } from './input';
+import type { Action } from '../data/controls';
+
+/** Экранная кнопка для телефона: какое действие, подпись, подсветка. */
+export interface TouchButton {
+  action: Action;
+  label: string;
+  /** Подсветить (например, «Нота» в момент обрыва). */
+  hot?: boolean;
+  /** Показать тусклой (ещё не готова). */
+  dim?: boolean;
+}
+
+/** Нужен ли джойстик и какие кнопки показать на телефоне сейчас. */
+export interface TouchLayout {
+  move: boolean;
+  look: boolean;
+  buttons: TouchButton[];
+}
 
 export interface GameScene {
   readonly id: string;
@@ -9,6 +27,8 @@ export interface GameScene {
   update(dt: number, input: InputFrame): void;
   render(alpha: number, frameDt: number): void;
   dispose(): void;
+  /** Раскладка экранного управления (для телефонов). */
+  touchLayout?(): TouchLayout;
 }
 
 export class SceneManager {

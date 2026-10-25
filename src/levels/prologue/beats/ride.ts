@@ -8,10 +8,13 @@ import type { Beat, PrologueScene } from '../prologue-scene';
 import { ScooterController, type Obstacle } from '../../../player/scooter';
 import { LOW_KINDS, RIDE, RIDE_TRIGGERS } from '../../../data/levels/prologue-ride';
 import { buildObstacle, buildScooter, buildVan } from '../props';
+import { mergeStaticGroup } from '../../../render/world-kit';
 import { createVan, placeVanBehind, updateVan, type VanState } from '../van';
 import { BARKS, HINTS, OBJECTIVES, ORDER, PUSHES, RIDE_LINES, SCRIPT_BLOCKED, SCRIPT_INTRO, TITLES } from '../../../data/text/prologue';
 import { ORDER_TIMER } from '../../../data/balance';
 import { buildRig, poseRig, type Rig } from '../../../render/characters';
+import type { TouchLayout } from '../../../core/scene';
+import { TOUCH_TEXT } from '../../../data/text/ui';
 import { RESTORER, RESTORER_LEADER } from '../../../data/characters';
 
 type Phase = 'intro' | 'walk' | 'ride' | 'caught' | 'blocked';
@@ -55,6 +58,7 @@ export class RideBeat implements Beat {
       const o: Obstacle = { x: d.x, z: d.z, hx: d.hx, hz: d.hz, rotY: d.rotY ?? 0, low: LOW_KINDS.includes(d.kind), knocked: false, id: id++ };
       this.obstacles.push(o);
       const v = buildObstacle(d.kind, d.hx, d.hz, CAR_COLORS[o.id % CAR_COLORS.length]);
+      mergeStaticGroup(v);
       v.position.set(d.x, 0, d.z);
       v.rotation.y = o.rotY;
       this.group.add(v);
@@ -162,6 +166,15 @@ export class RideBeat implements Beat {
         s.cam.update(dt, 0, 0, s.player.pos, null);
         break;
     }
+  }
+
+  touchLayout(): TouchLayout {
+    const riding = this.phase === 'ride';
+    return {
+      move: this.s.player.controllable && (riding || this.phase === 'walk'),
+      look: true,
+      buttons: riding ? [{ action: 'dash', label: TOUCH_TEXT.hop, dim: this.scooter.sc.hopCooldown > 0 }] : [],
+    };
   }
 
   private mount(): void {
