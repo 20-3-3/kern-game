@@ -8,6 +8,8 @@ import { LevelScene } from '../level-scene';
 import { vec3 } from '../../core/math';
 import { MAP } from '../../data/levels/prologue-map';
 import { buildCity, type City } from './city';
+import { buildVan } from './props';
+import { RIDE } from '../../data/levels/prologue-ride';
 import { DialogueRunner, type Script } from '../../dialogue/engine';
 import type { GameContext } from '../../core/context';
 
@@ -60,6 +62,12 @@ export class PrologueScene extends LevelScene {
 
   protected buildWorld(): void {
     this.city = buildCity(this.scene, this.physics);
+    // Второй минивэн Реставраторов перегораживает проспект у площади.
+    const blockVan = buildVan();
+    blockVan.position.set(0, 0, RIDE.blockVanZ);
+    blockVan.rotation.y = Math.PI / 2;
+    this.city.root.add(blockVan);
+    this.physics.addBox(vec3(0, 1.2, RIDE.blockVanZ), vec3(3.4, 1.2, 1.1));
   }
 
   protected spawnPoint() {

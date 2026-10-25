@@ -279,3 +279,94 @@ kbd {
 .r-stars { font-size: 26px; color: #f5a623; margin: 6px 0; letter-spacing: 0.1em; }
 .r-tip { font-size: 15px; color: #c0392b; font-weight: 600; }
 .r-review { margin-top: 8px; font-size: 15px; font-style: italic; color: #444; }
+
+/* ---------- боевой HUD ---------- */
+
+.hud { opacity: 0; transition: opacity 0.4s; }
+.hud.show { opacity: 1; }
+
+.hud .bar {
+  position: relative;
+  height: 10px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.hud .bar-fill, .hud .bar-lag {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  transition: width 0.08s linear;
+}
+
+.hud-label { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); margin-bottom: 3px; }
+
+.hud-hp { position: absolute; left: 24px; bottom: 28px; width: 280px; }
+.hud-hp .bar-fill { background: linear-gradient(90deg, #ffb347, #ff8a1e); }
+.hud-hp .bar-fill.low { background: var(--danger); }
+.hud-hp .bar-lag { background: rgba(255, 255, 255, 0.5); transition: none; }
+
+.hud-accord { position: absolute; left: 24px; bottom: 72px; width: 220px; }
+.hud-accord .bar-fill { background: linear-gradient(90deg, #4fb8ff, #bfefff); box-shadow: 0 0 10px #8fe3ff; }
+.hud-accord.full .hud-label { color: var(--cold); text-shadow: 0 0 8px var(--cold); }
+.hud-accord.full .bar { border-color: var(--cold); box-shadow: 0 0 12px rgba(143, 227, 255, 0.6); }
+.hud-accord.blocked .bar-fill { filter: grayscale(1) brightness(0.6); }
+
+.hud-jam { position: absolute; right: 26px; bottom: 28px; width: 190px; display: grid; grid-template-columns: 44px 1fr; grid-template-rows: auto auto; column-gap: 10px; align-items: center; }
+.jam-disc {
+  grid-row: 1 / 3;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffb347 0 14%, #111 15% 30%, #222 31% 33%, #111 34% 55%, #222 56% 58%, #111 59%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.jam-label { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); }
+.hud-jam .bar-fill { background: linear-gradient(90deg, #8a8a8a, #ffffff); }
+.hud-jam.high .bar-fill { background: linear-gradient(90deg, #ff9f43, #ff5d5d); }
+.hud-jam.high .jam-label { color: #ff9f43; }
+.hud-jam.max .bar { animation: jamPulse 0.25s infinite alternate; }
+
+@keyframes jamPulse { from { border-color: #ff5d5d; } to { border-color: #fff; } }
+
+.hud-silence {
+  position: absolute;
+  left: 260px;
+  bottom: 68px;
+  font-size: 14px;
+  color: var(--dim);
+  padding: 4px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+}
+.hud-silence.ready { color: #9be37a; border-color: #9be37a; }
+
+.hud-boss { position: absolute; left: 50%; top: 26px; transform: translateX(-50%); width: min(560px, 70vw); opacity: 0; transition: opacity 0.4s; }
+.hud-boss.show { opacity: 1; }
+.boss-name { text-align: center; font-size: 15px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--cold); margin-bottom: 5px; text-shadow: 0 0 10px rgba(143, 227, 255, 0.6); }
+.hud-boss .bar { height: 12px; }
+.hud-boss .bar-fill { background: linear-gradient(90deg, #5fcfff, #dff7ff); }
+.hud-boss.cutoff .bar { animation: jamPulse 0.4s infinite alternate; }
+.boss-phases { display: flex; gap: 6px; justify-content: center; margin-top: 6px; }
+.boss-phases span { width: 26px; height: 4px; background: rgba(255, 255, 255, 0.2); border-radius: 2px; }
+.boss-phases span.done { background: rgba(143, 227, 255, 0.35); }
+.boss-phases span.cur { background: var(--cold); box-shadow: 0 0 6px var(--cold); }
+
+.reticle {
+  position: absolute;
+  left: -18px;
+  top: -18px;
+  width: 36px;
+  height: 36px;
+  border: 2px solid rgba(255, 210, 120, 0.9);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.reticle.show { opacity: 1; }
+.reticle::after { content: ''; position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px; background: #ffd27a; border-radius: 50%; }
+.reticle-hp { position: absolute; left: -12px; top: 42px; height: 3px; width: 100%; max-width: 60px; background: #ffd27a; }

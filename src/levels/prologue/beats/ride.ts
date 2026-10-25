@@ -27,7 +27,6 @@ export class RideBeat implements Beat {
   private knockAnim = new Map<number, number>();
   private van: VanState = createVan();
   private vanView!: THREE.Group;
-  private blockVan!: THREE.Group;
   private scooterView!: ReturnType<typeof buildScooter>;
   private group = new THREE.Group();
   private fired = new Set<number>();
@@ -70,11 +69,6 @@ export class RideBeat implements Beat {
     this.vanView = buildVan();
     this.vanView.visible = false;
     this.group.add(this.vanView);
-    this.blockVan = buildVan();
-    this.blockVan.position.set(0, 0, RIDE.blockVanZ);
-    this.blockVan.rotation.y = Math.PI / 2;
-    s.city.root.add(this.blockVan);
-    s.physics.addBox(vec3(0, 1.2, RIDE.blockVanZ), vec3(3.4, 1.2, 1.1));
 
     s.controller.teleport(vec3(RIDE.playerSpawn.x, 0.05, RIDE.playerSpawn.z), Math.PI * 1.4);
     s.cam.yaw = Math.PI * 1.25;

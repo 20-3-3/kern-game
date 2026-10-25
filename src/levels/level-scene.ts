@@ -6,7 +6,7 @@ import type { GameScene } from '../core/scene';
 import type { InputFrame } from '../core/input';
 import type { GameContext } from '../core/context';
 import { Physics } from '../core/physics';
-import { createPlayerState, PlayerController, type PlayerState } from '../player/controller';
+import { createPlayerState, PlayerController, type LocomotionOptions, type PlayerState } from '../player/controller';
 import { PlayerView } from '../player/view';
 import { CameraRig } from '../player/camera';
 import { PLAYER, CAMERA } from '../data/balance';
@@ -60,8 +60,8 @@ export abstract class LevelScene implements GameScene {
   }
 
   /** Стандартное движение игрока (уровни могут вызывать со своими опциями). */
-  movePlayer(dt: number, f: InputFrame, lockTarget: Vec3 | null, speedOverride?: number, lockTurn?: boolean): void {
-    this.controller.update(dt, f, { camYaw: this.cam.yaw, speedOverride, lockTurn });
+  movePlayer(dt: number, f: InputFrame, lockTarget: Vec3 | null, opt: Omit<LocomotionOptions, 'camYaw'> = {}): void {
+    this.controller.update(dt, f, { camYaw: this.cam.yaw, ...opt });
     this.cam.update(dt, f.lookX, f.lookY, this.player.pos, lockTarget);
   }
 

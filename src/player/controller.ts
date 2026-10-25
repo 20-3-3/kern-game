@@ -80,6 +80,10 @@ export interface LocomotionOptions {
   speedOverride?: number;
   /** Запрет поворота по вводу (во время удара). */
   lockTurn?: boolean;
+  /** Принудительная скорость (шаг вперёд при ударе, отброс). */
+  forced?: { x: number; z: number };
+  /** Запрет рывка (во время броска, кат-сцены). */
+  noDash?: boolean;
 }
 
 export class PlayerController {
@@ -136,6 +140,7 @@ export class PlayerController {
     if (
       ctrl &&
       s.dashEnabled &&
+      !opt.noDash &&
       isPressed(f, 'dash') &&
       s.dashCooldown <= 0 &&
       s.action !== 'hurt' &&
@@ -165,6 +170,9 @@ export class PlayerController {
         s.vel.x *= 0.35;
         s.vel.z *= 0.35;
       }
+    } else if (opt.forced) {
+      s.vel.x = opt.forced.x;
+      s.vel.z = opt.forced.z;
     } else {
       const speed = opt.speedOverride ?? PLAYER.runSpeed;
       const canMove = s.action !== 'hurt' && s.action !== 'down' && s.action !== 'cast';

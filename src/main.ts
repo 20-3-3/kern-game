@@ -13,11 +13,14 @@ import type { BeatId } from './levels/prologue/prologue-scene';
 import { DEFAULT_MOUSE_SENSITIVITY } from './data/controls';
 import { UI } from './ui/ui';
 import { HumorLayer } from './ui/humor';
+import { Hud } from './ui/hud';
 
 const boot = async () => {
   const canvas = document.getElementById('game') as HTMLCanvasElement;
   const loadingEl = document.getElementById('loading') as HTMLDivElement;
-  const ui = new UI(document.getElementById('ui') as HTMLDivElement);
+  const uiRoot = document.getElementById('ui') as HTMLDivElement;
+  const hud = new Hud(uiRoot);
+  const ui = new UI(uiRoot);
   await initRapier();
 
   const renderer = new Renderer(canvas);
@@ -39,6 +42,7 @@ const boot = async () => {
     loop,
     scenes,
     ui,
+    hud,
     settings: {
       mouseSensitivity: DEFAULT_MOUSE_SENSITIVITY,
       invertY: false,
