@@ -43,4 +43,6 @@ export interface GameEvents {
   sfx: { id: string; pos?: Vec3; volume?: number };
   push: { text: string };
   bark: { speaker: string; text: string };
+  /** Состояние музыки: calm, chase, fight, kern, boss, serious, home, silent. */
+  music: { mode: string };
 }

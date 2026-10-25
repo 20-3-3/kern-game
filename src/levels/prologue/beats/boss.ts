@@ -58,6 +58,7 @@ export class BossBeat implements Beat {
     const s = this.s;
     s.scene.add(this.group);
     s.bus.emit('serious', { on: false });
+    s.bus.emit('music', { mode: 'serious' });
     this.arena = new Arena(s);
     this.arena.combat.mode = 'kern';
     this.kc = new KernCombat(s, this.arena);
@@ -136,6 +137,7 @@ export class BossBeat implements Beat {
       s.ui.objective(BOSS_OBJECTIVES.fight);
       s.ui.hint(BOSS_HINTS.rhythm, 8);
       this.boss.start();
+      s.bus.emit('music', { mode: 'boss' });
       this.phase = 'fight';
       this.phaseTime = 0;
     }
@@ -372,6 +374,7 @@ export class BossBeat implements Beat {
     s.ctx.hud.show(false);
     s.bus.emit('serious', { on: true });
     s.bus.emit('sfx', { id: 'lastNoteStart', pos: { ...b.pos } });
+    s.bus.emit('music', { mode: 'silent' });
     // Лёва в два шага у цели, удар-«доставка до двери».
     const dir = Math.atan2(s.player.pos.x - b.pos.x, s.player.pos.z - b.pos.z);
     s.controller.teleport(vec3(b.pos.x + Math.sin(dir) * 2, 0.05, b.pos.z + Math.cos(dir) * 2), dir + Math.PI);
@@ -415,6 +418,7 @@ export class BossBeat implements Beat {
     s.ctx.hud.show(false);
     s.bus.emit('serious', { on: true });
     s.bus.emit('sfx', { id: 'killed', pos: { ...b.pos } });
+    s.bus.emit('music', { mode: 'silent' });
     s.bus.emit('bossKilled', { boss: CFG.id });
     s.bus.emit('choiceMade', { id: 'prologue', value: 'kill' });
     s.ui.flash('rgba(255,255,255,0.6)', 0.3);

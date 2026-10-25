@@ -24,7 +24,7 @@ export interface DialogueHooks {
 }
 
 /** Время показа реплики по длине текста. */
-export const lineDuration = (text: string): number => Math.min(7, 1.4 + text.length * 0.055);
+export const lineDuration = (text: string): number => Math.min(8, 1.3 + text.length * 0.065);
 
 export class DialogueRunner {
   private script: Script = [];

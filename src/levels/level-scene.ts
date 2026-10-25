@@ -81,12 +81,14 @@ export abstract class LevelScene implements GameScene {
       this.cutCamCur.look.lerp(target.look, k);
       camera.position.copy(this.cutCamCur.pos);
       camera.lookAt(this.cutCamCur.look);
+      this.ctx.audio.setListener(camera.position.x, camera.position.z, Math.atan2(this.cutCamCur.look.x - camera.position.x, this.cutCamCur.look.z - camera.position.z));
       return;
     }
     this.cutCamCur = null;
     const pose = this.cam.pose(this.interpPlayer(alpha), frameDt, (o, d, m) => this.physics.castRay(o, d, m));
     camera.position.set(pose.pos.x, pose.pos.y, pose.pos.z);
     camera.lookAt(pose.look.x, pose.look.y, pose.look.z);
+    this.ctx.audio.setListener(pose.look.x, pose.look.z, this.cam.yaw);
   }
 
   /** Сколько кадров не перерисовывать («перескок» кадра при заедании). */

@@ -32,6 +32,8 @@ export class UI {
   private subTimer = 0;
   private centerTimer = 0;
   onChoice: ((value: string) => void) | null = null;
+  /** Новая реплика в субтитрах (для озвучки). */
+  onLine: ((speaker: string, text: string) => void) | null = null;
 
   constructor(root: HTMLElement) {
     this.root = root;
@@ -150,6 +152,7 @@ export class UI {
     this.subsEl.innerHTML = `<span class="who" style="color:${sp.color}">${sp.name}</span><span class="what"></span>`;
     (this.subsEl.querySelector('.what') as HTMLElement).textContent = text;
     this.subsEl.classList.add('show');
+    this.onLine?.(speaker, text);
   }
 
   choice(prompt: string | undefined, options: { value: string; label: string }[] | null): void {

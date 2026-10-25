@@ -27,6 +27,7 @@ export class KernBeat implements Beat {
   enter(): void {
     const s = this.s;
     s.bus.emit('serious', { on: false });
+    s.bus.emit('music', { mode: 'serious' });
     s.ui.fade(0, 1.2);
     s.player.controllable = true;
     s.player.hp = s.player.maxHp;
@@ -100,6 +101,7 @@ export class KernBeat implements Beat {
     s.player.controllable = true;
     s.ctx.hud.show(true);
     this.kc ??= new KernCombat(s, this.arena);
+    s.bus.emit('music', { mode: 'kern' });
     s.ui.objective(KERN_OBJECTIVES.echoes);
     const spots = PROLOGUE_ARENA.waves[i];
     spots.forEach((p: Vec3, k: number) => {

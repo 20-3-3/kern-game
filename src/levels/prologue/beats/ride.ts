@@ -77,6 +77,7 @@ export class RideBeat implements Beat {
     s.ui.fade(1, 0);
     s.player.controllable = false;
     s.bus.emit('serious', { on: false });
+    s.bus.emit('music', { mode: 'calm' });
   }
 
   private setPhase(p: Phase): void {
@@ -245,6 +246,7 @@ export class RideBeat implements Beat {
         placeVanBehind(this.van, s.player.pos.x, s.player.pos.z);
         this.vanView.visible = true;
         s.bus.emit('sfx', { id: 'tuningFork' });
+        s.bus.emit('music', { mode: 'chase' });
         s.bus.emit('bark', BARKS.vanAppears[0]);
         s.ui.objective(OBJECTIVES.escape);
         this.later(2.5, () => s.ui.say('leva', RIDE_LINES.vanAppears));
@@ -310,6 +312,7 @@ export class RideBeat implements Beat {
     this.timerOn = false;
     s.ui.hint(null);
     s.bus.emit('sfx', { id: 'brake' });
+    s.bus.emit('music', { mode: 'serious' });
     s.play(SCRIPT_BLOCKED, () => {
       s.cutCam = null;
       s.goTo('brawl');

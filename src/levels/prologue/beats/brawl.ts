@@ -48,6 +48,7 @@ export class BrawlBeat implements Beat {
     s.bus.on('hit', this.onHit);
     this.setup();
     s.bus.emit('bark', BRAWL_BARKS.start);
+    s.bus.emit('music', { mode: 'fight' });
   }
 
   private setup(): void {
@@ -126,6 +127,7 @@ export class BrawlBeat implements Beat {
     s.ctx.hud.show(false);
     this.arena.lock.target = null;
     s.ui.objective(null);
+    s.bus.emit('music', { mode: 'serious' });
     // Старший Реставратор приподнимается для последней реплики.
     if (this.leader) this.leader.cutscenePose = 'kneel';
     s.play(SCRIPT_SUMMON, () => {

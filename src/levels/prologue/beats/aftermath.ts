@@ -42,6 +42,7 @@ export class AftermathBeat implements Beat {
     s.ctx.hud.show(false);
     s.ui.objective(null);
     s.bus.emit('serious', { on: true });
+    s.bus.emit('music', { mode: 'serious' });
     this.recordResult();
     // Керн принимает форму самой громкой записи рядом: доиграна — снова камень.
     s.playerView.setWeapon(this.killed ? 'sword' : 'kern');
@@ -99,6 +100,7 @@ export class AftermathBeat implements Beat {
     this.setPhase('outro');
     s.cutCam = null;
     s.bus.emit('serious', { on: false });
+    s.bus.emit('music', { mode: 'calm' });
     s.bus.emit('bark', AFTER_BARKS.streamEnd);
     s.ui.orderTimer(null);
     s.onPrologueStreetDone();

@@ -10,6 +10,8 @@ import type { UI } from '../ui/ui';
 import type { Hud } from '../ui/hud';
 import type { SaveStore } from './save';
 import type { ProgressState } from '../systems/progress';
+import type { AudioEngine } from '../audio/engine';
+import type { Voice } from '../audio/voice';
 
 export interface Settings {
   mouseSensitivity: number;
@@ -31,6 +33,8 @@ export interface GameContext {
   ui: UI;
   hud: Hud;
   save: SaveStore;
+  audio: AudioEngine;
+  voice: Voice;
   /** Текущее прохождение (сохраняется в конце глав). */
   progress: ProgressState;
 }

@@ -179,6 +179,7 @@ export class HomeScene extends LevelScene {
     this.cam.distance = 3.2;
     this.cam.pitch = 0.3;
     this.ctx.bus.emit('serious', { on: true });
+    this.ctx.bus.emit('music', { mode: 'home' });
     this.ctx.ui.clear();
     this.ctx.hud.show(false);
     this.ctx.ui.fade(0, 1.5);
