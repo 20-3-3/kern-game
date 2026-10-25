@@ -5,6 +5,7 @@ import { PrologueScene, type BeatId } from './prologue-scene';
 import { RideBeat } from './beats/ride';
 import { FreeBeat } from './beats/free';
 import { BrawlBeat } from './beats/brawl';
+import { KernBeat } from './beats/kern';
 
 export const createPrologue = (ctx: GameContext, start: BeatId = 'ride'): PrologueScene =>
   new PrologueScene(
@@ -12,7 +13,7 @@ export const createPrologue = (ctx: GameContext, start: BeatId = 'ride'): Prolog
     {
       ride: (s) => new RideBeat(s),
       brawl: (s) => new BrawlBeat(s),
-      kern: (s) => new FreeBeat(s),
+      kern: (s) => new KernBeat(s),
       boss: (s) => new FreeBeat(s),
       aftermath: (s) => new FreeBeat(s),
     },

@@ -99,9 +99,15 @@ export class FighterView {
       if (f.state === 'dead') {
         m.transparent = true;
         m.opacity = Math.max(0, 0.8 - f.stateTime * 0.7);
+      } else if (f.state === 'spawn') {
+        m.transparent = true;
+        m.opacity = Math.min(1, f.stateTime / Math.max(0.1, f.spawnTime)) * (this.f.def.human ? 1 : 0.75);
+      } else if (!f.def.human) {
+        m.opacity = 0.72 + Math.sin(this.idle * 9 + i) * 0.06;
       }
     });
     if (f.state === 'dead') r.position.y += f.stateTime * 0.6;
+    if (f.state === 'spawn') r.position.y -= Math.max(0, 1 - f.stateTime / Math.max(0.1, f.spawnTime)) * 1.2;
   }
 
   dispose(): void {

@@ -9,6 +9,8 @@ import { vec3 } from '../../core/math';
 import { MAP } from '../../data/levels/prologue-map';
 import { buildCity, type City } from './city';
 import { buildVan } from './props';
+import { armDruzhinnik, armNika, Npc } from './npc';
+import { DRUZHINNIK, NIKA } from '../../data/characters';
 import { RIDE } from '../../data/levels/prologue-ride';
 import { DialogueRunner, type Script } from '../../dialogue/engine';
 import type { GameContext } from '../../core/context';
@@ -34,6 +36,8 @@ export class PrologueScene extends LevelScene {
   private beat: Beat | null = null;
   private pendingBeat: BeatId | null = null;
   private focus = new THREE.Vector3();
+  private druzhinnik: Npc | null = null;
+  private nika: Npc | null = null;
 
   constructor(
     ctx: GameContext,
@@ -68,6 +72,25 @@ export class PrologueScene extends LevelScene {
     blockVan.rotation.y = Math.PI / 2;
     this.city.root.add(blockVan);
     this.physics.addBox(vec3(0, 1.2, RIDE.blockVanZ), vec3(3.4, 1.2, 1.1));
+  }
+
+  /** Дружинник вне боя (кат-сцены, повтор записи). */
+  druzhinnikNpc(): Npc {
+    if (!this.druzhinnik) {
+      this.druzhinnik = new Npc(this.city.root, DRUZHINNIK, vec3(0, 0, -590), 0);
+      armDruzhinnik(this.druzhinnik.rig);
+      this.druzhinnik.opacity = 0;
+    }
+    return this.druzhinnik;
+  }
+
+  nikaNpc(): Npc {
+    if (!this.nika) {
+      this.nika = new Npc(this.city.root, NIKA, vec3(-30, 0, -540), 0);
+      armNika(this.nika.rig);
+      this.nika.opacity = 0;
+    }
+    return this.nika;
   }
 
   protected spawnPoint() {
