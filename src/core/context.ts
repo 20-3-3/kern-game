@@ -6,6 +6,7 @@ import type { EventBus } from './events';
 import type { GameEvents } from './game-events';
 import type { FixedLoop } from './loop';
 import type { SceneManager } from './scene';
+import type { UI } from '../ui/ui';
 
 export interface Settings {
   mouseSensitivity: number;
@@ -24,5 +25,5 @@ export interface GameContext {
   loop: FixedLoop;
   scenes: SceneManager;
   settings: Settings;
-  ui: HTMLElement;
+  ui: UI;
 }

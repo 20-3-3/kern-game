@@ -38,3 +38,31 @@ export const CAMERA = {
   /** Поворот камеры к спине игрока, когда мышь не трогают. */
   followLambda: 0,
 };
+
+export const SCOOTER = {
+  maxSpeed: 12,
+  accel: 6.5,
+  brake: 14,
+  coastDecel: 1.2,
+  steerRate: 2.1,
+  /** Рывок на самокате — подскок с ускорением. */
+  hop: { duration: 0.55, height: 0.95, boost: 4.5, cooldown: 0.75, clearHeight: 0.3 },
+  boostDecay: 3.5,
+  crash: { stun: 1.0, minSpeed: 3.5 },
+  radius: 0.45,
+};
+
+export const VAN = {
+  startBehind: 42,
+  baseSpeed: 9.2,
+  /** Прирост скорости по ходу погони, м/с на 100 м. */
+  rampPer100m: 0.35,
+  /** Если игрок далеко впереди, минивэн подтягивается. */
+  rubberBandDist: 45,
+  catchDist: 3.2,
+  steer: 1.4,
+  maxX: 6.5,
+};
+
+/** Таймер заказа идёт быстрее реального времени, чтобы опоздание было смешным, а не долгим. */
+export const ORDER_TIMER = { rate: 6 };

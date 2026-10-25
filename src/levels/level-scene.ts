@@ -14,19 +14,19 @@ import { lerp, vec3, type Vec3 } from '../core/math';
 
 export abstract class LevelScene implements GameScene {
   abstract readonly id: string;
-  protected physics!: Physics;
-  protected player!: PlayerState;
-  protected controller!: PlayerController;
-  protected playerView!: PlayerView;
-  protected cam!: CameraRig;
-  protected time = 0;
+  physics!: Physics;
+  player!: PlayerState;
+  controller!: PlayerController;
+  playerView!: PlayerView;
+  cam!: CameraRig;
+  time = 0;
   /** Камера в кат-сцене: если задана, игровая камера не используется. */
-  protected cutCam: { pos: Vec3; look: Vec3 } | null = null;
+  cutCam: { pos: Vec3; look: Vec3 } | null = null;
   private cutCamCur: { pos: THREE.Vector3; look: THREE.Vector3 } | null = null;
 
-  constructor(protected ctx: GameContext) {}
+  constructor(readonly ctx: GameContext) {}
 
-  protected get scene(): THREE.Scene {
+  get scene(): THREE.Scene {
     return this.ctx.renderer.scene;
   }
 
@@ -60,12 +60,12 @@ export abstract class LevelScene implements GameScene {
   }
 
   /** Стандартное движение игрока (уровни могут вызывать со своими опциями). */
-  protected movePlayer(dt: number, f: InputFrame, lockTarget: Vec3 | null, speedOverride?: number, lockTurn?: boolean): void {
+  movePlayer(dt: number, f: InputFrame, lockTarget: Vec3 | null, speedOverride?: number, lockTurn?: boolean): void {
     this.controller.update(dt, f, { camYaw: this.cam.yaw, speedOverride, lockTurn });
     this.cam.update(dt, f.lookX, f.lookY, this.player.pos, lockTarget);
   }
 
-  protected interpPlayer(alpha: number): Vec3 {
+  interpPlayer(alpha: number): Vec3 {
     const s = this.player;
     return vec3(lerp(s.prevPos.x, s.pos.x, alpha), lerp(s.prevPos.y, s.pos.y, alpha), lerp(s.prevPos.z, s.pos.z, alpha));
   }
