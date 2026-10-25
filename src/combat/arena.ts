@@ -170,6 +170,8 @@ export class Arena {
     this.bus.emit('hit', { attacker: p.id, target: fi.id, damage: r.dealt, kind: h.kind, blocked: false, pos: { ...fi.pos } });
     this.bus.emit('sfx', { id: this.combat.mode === 'kern' ? 'kernHit' : 'bagHit', pos: { ...fi.pos } });
     this.s.cam.kick(h.kind === 'heavy' ? 0.6 : 0.3);
+    this.s.fx.burst({ x: fi.pos.x, y: 1.2, z: fi.pos.z }, this.combat.mode === 'kern' ? 0xbff4ff : 0xffc070, h.kind === 'heavy' ? 10 : 5, 3);
+    this.s.ctx.loop.hitStop(h.kind === 'heavy' || r.killed ? 0.07 : 0.035);
     if (r.killed) {
       this.bus.emit('enemyDefeated', { id: fi.id, kind: fi.def.kind, pos: { ...fi.pos } });
       if (this.lock.target === fi.id) this.lock.target = null;
@@ -192,6 +194,8 @@ export class Arena {
         this.bus.emit('sfx', { id: 'parry', pos });
         this.action('parry');
         s.cam.kick(0.5);
+        s.fx.burst({ x: (p.pos.x + a.from.x) / 2, y: 1.3, z: (p.pos.z + a.from.z) / 2 }, 0xffe7a0, 14, 4);
+        s.ctx.loop.hitStop(0.09);
         break;
       case 'blocked': {
         const dmg = a.damage * DEFENSE.blockDamageMul * this.incomingMul;

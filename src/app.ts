@@ -3,7 +3,6 @@
 import type { GameContext, Settings } from './core/context';
 import { Menu } from './ui/menu';
 import { MenuScene } from './levels/menu-scene';
-import { createPrologue } from './levels/prologue';
 import type { BeatId } from './levels/prologue/prologue-scene';
 import { newProgress } from './systems/progress';
 import { averageJam } from './systems/ending';
@@ -25,7 +24,7 @@ export class App {
         newGame: () => this.newGame(),
         continueGame: () => this.continueGame(),
         resume: () => this.resume(),
-        restartChapter: () => this.startPrologue('ride'),
+        restartChapter: () => void this.startPrologue('ride'),
         toMenu: () => void this.toMenu(),
         settingsChanged: (s) => this.applySettings(s),
       },
@@ -80,15 +79,15 @@ export class App {
   private newGame(): void {
     this.ctx.progress = newProgress();
     this.ctx.save.clearCheckpoint();
-    this.startPrologue('ride');
+    void this.startPrologue('ride');
   }
 
   private continueGame(): void {
     const cp = this.ctx.save.loadCheckpoint();
-    this.startPrologue((cp?.beat as StartPoint | undefined) ?? 'ride');
+    void this.startPrologue((cp?.beat as StartPoint | undefined) ?? 'ride');
   }
 
-  startPrologue(start: StartPoint): void {
+  async startPrologue(start: StartPoint): Promise<void> {
     const ctx = this.ctx;
     this.menu.hide();
     this.paused = false;
@@ -98,6 +97,8 @@ export class App {
     ctx.loop.timeScale = 1;
     ctx.audio.setMuffle(0);
     ctx.input.requestPointerLock();
+    // Каждая глава — отдельный кусок кода, грузится, когда нужна.
+    const { createPrologue } = await import('./levels/prologue');
     const scene = createPrologue(
       ctx,
       {

@@ -28,7 +28,8 @@ export interface City {
   root: THREE.Group;
 }
 
-export const buildCity = (scene: THREE.Scene, physics: Physics): City => {
+/** lights — сколько настоящих источников света у фонарей (меньше — быстрее). */
+export const buildCity = (scene: THREE.Scene, physics: Physics, lights = 5): City => {
   const root = new THREE.Group();
   scene.add(root);
   const rng = makeRng(1380);
@@ -265,7 +266,7 @@ export const buildCity = (scene: THREE.Scene, physics: Physics): City => {
       lampSpots.map((p) => ({ pos: new THREE.Vector3(p.x, 0.17, p.z) })),
     ),
   );
-  const lights = new LightPool(scene, lampSpots, 6, 0xffb366, 55, 26);
+  const pool = new LightPool(scene, lampSpots, lights, 0xffb366, 55, 26);
 
   // Деревья вдоль тротуаров.
   const trunks: { pos: THREE.Vector3; scale: number }[] = [];
@@ -299,11 +300,11 @@ export const buildCity = (scene: THREE.Scene, physics: Physics): City => {
   root.add(coldLight);
 
   return {
-    lights,
+    lights: pool,
     coldLight,
     root,
     update(focus, t) {
-      lights.update(focus);
+      pool.update(focus);
       // Одна вывеска «подмигивает», как старая неоновая трубка.
       const flick = signs[3];
       if (flick) (flick.material as THREE.MeshBasicMaterial).opacity = Math.sin(t * 13) > 0.85 || Math.sin(t * 3.1) > 0.97 ? 0.3 : 1;

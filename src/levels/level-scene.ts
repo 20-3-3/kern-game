@@ -11,6 +11,7 @@ import { PlayerView } from '../player/view';
 import { CameraRig } from '../player/camera';
 import { PLAYER, CAMERA } from '../data/balance';
 import { lerp, vec3, type Vec3 } from '../core/math';
+import { Fx } from '../render/fx';
 
 export abstract class LevelScene implements GameScene {
   abstract readonly id: string;
@@ -19,6 +20,7 @@ export abstract class LevelScene implements GameScene {
   controller!: PlayerController;
   playerView!: PlayerView;
   cam!: CameraRig;
+  fx!: Fx;
   time = 0;
   /** Камера в кат-сцене: если задана, игровая камера не используется. */
   cutCam: { pos: Vec3; look: Vec3 } | null = null;
@@ -39,6 +41,7 @@ export abstract class LevelScene implements GameScene {
   async load(): Promise<void> {
     this.physics = new Physics();
     await this.buildWorld();
+    this.fx = new Fx(this.scene);
     const sp = this.spawnPoint();
     const id = this.physics.addCharacter(sp.pos, PLAYER.radius, PLAYER.height);
     this.player = createPlayerState(id, sp.pos, sp.yaw);
@@ -102,6 +105,7 @@ export abstract class LevelScene implements GameScene {
       return;
     }
     this.renderWorld(alpha, frameDt);
+    this.fx.update(frameDt);
     this.applyCamera(alpha, frameDt);
     this.ctx.renderer.render();
   }

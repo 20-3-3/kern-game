@@ -73,17 +73,18 @@ export const JAM = {
   historySize: 12,
   /** Длина связки (n-грамма), повтор которой считается заеданием. */
   linkLength: 3,
-  /** Рост за каждое действие, которое повторяет недавнюю связку (умножается на число повторов, до 3). */
-  repeatGrowth: 0.04,
+  /** Рост за каждое действие, которое повторяет недавнюю связку (умножается на число повторов, до repeatCap). */
+  repeatGrowth: 0.032,
+  repeatCap: 2,
   /** Снижение за новую связку. */
-  newLinkRelief: 0.03,
+  newLinkRelief: 0.04,
   /** Снижение, когда в последних 8 действиях не меньше 4 разных. */
   diversityRelief: 0.02,
   diversityWindow: 8,
   diversityMin: 4,
   /** Медленный спад, если игрок не действует. */
-  idleDecay: 0.02,
-  idleAfter: 3,
+  idleDecay: 0.04,
+  idleAfter: 2,
   /** Пороги. */
   highThreshold: 0.5,
   maxThreshold: 1,

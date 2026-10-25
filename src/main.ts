@@ -101,7 +101,7 @@ const boot = async () => {
   loop.start();
   // ?beat=boss — сразу к нужному отрезку пролога (для проверки).
   const beat = params.get('beat') as BeatId | 'home' | null;
-  if (beat) app.startPrologue(beat);
+  if (beat) await app.startPrologue(beat);
   else await app.toMenu();
 };
 

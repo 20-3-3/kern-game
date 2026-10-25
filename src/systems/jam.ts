@@ -48,7 +48,7 @@ export class JamMeter {
     if (this.history.length >= c.linkLength) {
       const link = this.history.slice(-c.linkLength).join('>');
       const repeats = this.links.filter((l) => l === link).length;
-      if (repeats > 0) this.value += c.repeatGrowth * Math.min(3, repeats);
+      if (repeats > 0) this.value += c.repeatGrowth * Math.min(c.repeatCap, repeats);
       else this.value -= c.newLinkRelief;
       this.links.push(link);
       if (this.links.length > c.historySize) this.links.shift();

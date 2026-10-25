@@ -17,6 +17,8 @@ export class FixedLoop {
   private last = 0;
   private raf = 0;
   private running = false;
+  /** Короткий стоп-кадр при сильном попадании (в реальных секундах). */
+  private stop = 0;
 
   constructor(private cb: LoopCallbacks) {}
 
@@ -29,7 +31,12 @@ export class FixedLoop {
       this.raf = requestAnimationFrame(frame);
       const frameDt = Math.min((now - this.last) / 1000, MAX_FRAME);
       this.last = now;
-      this.acc += frameDt * this.timeScale;
+      let scale = this.timeScale;
+      if (this.stop > 0) {
+        this.stop -= frameDt;
+        scale *= 0.08;
+      }
+      this.acc += frameDt * scale;
       let steps = 0;
       while (this.acc >= FIXED_DT && steps < 8) {
         this.cb.update(FIXED_DT);
@@ -42,7 +49,12 @@ export class FixedLoop {
     this.raf = requestAnimationFrame(frame);
   }
 
-  stop(): void {
+  /** Стоп-кадр: логика почти замирает на sec секунд. */
+  hitStop(sec: number): void {
+    this.stop = Math.max(this.stop, sec);
+  }
+
+  halt(): void {
     this.running = false;
     cancelAnimationFrame(this.raf);
   }

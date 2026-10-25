@@ -152,6 +152,7 @@ export class BossBeat implements Beat {
     s.bus.emit('sfx', { id: 'kernHit', pos: { ...this.boss.pos } });
     s.fx.burst({ x: this.boss.pos.x, y: 1.6, z: this.boss.pos.z }, 0xbff4ff, 6, 3);
     s.cam.kick(h.kind === 'heavy' ? 0.6 : 0.3);
+    s.ctx.loop.hitStop(h.kind === 'heavy' ? 0.06 : 0.03);
     this.handleBossEvents(r.events);
   }
 
