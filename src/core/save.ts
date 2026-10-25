@@ -11,6 +11,12 @@ export interface KeyValueStorage {
 
 const PROGRESS_KEY = 'kern.progress.v1';
 const SETTINGS_KEY = 'kern.settings.v1';
+const CHECKPOINT_KEY = 'kern.checkpoint.v1';
+
+export interface Checkpoint {
+  chapter: string;
+  beat: string;
+}
 
 const defaultStorage = (): KeyValueStorage | null => {
   try {
@@ -55,6 +61,33 @@ export class SaveStore {
       this.storage?.removeItem(PROGRESS_KEY);
     } catch {
       // Нечего делать: хранилище недоступно.
+    }
+  }
+
+  loadCheckpoint(): Checkpoint | null {
+    try {
+      const raw = this.storage?.getItem(CHECKPOINT_KEY);
+      if (!raw) return null;
+      const c = JSON.parse(raw) as Partial<Checkpoint>;
+      return typeof c.chapter === 'string' && typeof c.beat === 'string' ? { chapter: c.chapter, beat: c.beat } : null;
+    } catch {
+      return null;
+    }
+  }
+
+  saveCheckpoint(c: Checkpoint): void {
+    try {
+      this.storage?.setItem(CHECKPOINT_KEY, JSON.stringify(c));
+    } catch {
+      // Без сохранения — значит без «Продолжить».
+    }
+  }
+
+  clearCheckpoint(): void {
+    try {
+      this.storage?.removeItem(CHECKPOINT_KEY);
+    } catch {
+      // ничего
     }
   }
 

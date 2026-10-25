@@ -12,11 +12,14 @@ import { HomeScene } from './home';
 export interface PrologueHooks {
   /** Пролог пройден целиком (после кассеты). */
   onFinished: () => void;
+  /** Новая контрольная точка: с неё можно продолжить из меню. */
+  onCheckpoint: (beat: BeatId | 'home') => void;
 }
 
 export const createPrologue = (ctx: GameContext, hooks: PrologueHooks, start: BeatId | 'home' = 'ride'): PrologueScene | HomeScene => {
-  const goHome = (killed: boolean) => void ctx.scenes.switchTo(new HomeScene(ctx, killed, hooks.onFinished));
-  if (start === 'home') return new HomeScene(ctx, ctx.progress.choices.prologue === 'kill', hooks.onFinished);
+  const home = (killed: boolean) => new HomeScene(ctx, killed, hooks.onFinished, () => hooks.onCheckpoint('home'));
+  const goHome = (killed: boolean) => void ctx.scenes.switchTo(home(killed));
+  if (start === 'home') return home(ctx.progress.choices.prologue === 'kill');
   const scene: PrologueScene = new PrologueScene(
     ctx,
     {
@@ -28,6 +31,9 @@ export const createPrologue = (ctx: GameContext, hooks: PrologueHooks, start: Be
     },
     start,
     () => goHome(scene.prologueResult === 'kill'),
+    (beat) => {
+      if (beat !== 'aftermath') hooks.onCheckpoint(beat);
+    },
   );
   return scene;
 };

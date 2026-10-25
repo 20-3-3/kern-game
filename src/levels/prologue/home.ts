@@ -35,6 +35,7 @@ export class HomeScene extends LevelScene {
     ctx: GameContext,
     private killed: boolean,
     private onDone: () => void,
+    private onEnter: () => void = () => undefined,
   ) {
     super(ctx);
     this.dialogue = new DialogueRunner({
@@ -178,6 +179,7 @@ export class HomeScene extends LevelScene {
     this.nika.lookAt = this.player.pos;
     this.cam.distance = 3.2;
     this.cam.pitch = 0.3;
+    this.onEnter();
     this.ctx.bus.emit('serious', { on: true });
     this.ctx.bus.emit('music', { mode: 'home' });
     this.ctx.ui.clear();

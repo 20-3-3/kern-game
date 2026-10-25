@@ -56,6 +56,8 @@ export abstract class LevelScene implements GameScene {
     this.cam.sensitivity = this.ctx.settings.mouseSensitivity;
     this.cam.invertY = this.ctx.settings.invertY;
     this.tick(dt, f);
+    // Сцену могли сменить прямо из tick (переход в следующую главу/сцену).
+    if (this.disposed) return;
     this.physics.step();
   }
 
@@ -113,7 +115,10 @@ export abstract class LevelScene implements GameScene {
     this.cam.yaw = yaw;
   }
 
+  private disposed = false;
+
   dispose(): void {
+    this.disposed = true;
     this.ctx.renderer.clearScene();
     this.physics?.dispose();
   }

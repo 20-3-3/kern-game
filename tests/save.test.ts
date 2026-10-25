@@ -74,4 +74,13 @@ describe('сохранения', () => {
     mem.data.set('kern.settings.v1', JSON.stringify({ volume: 'громко', invert: true }));
     expect(new SaveStore(mem).loadSettings({ volume: 0.5, invert: false })).toEqual({ volume: 0.5, invert: true });
   });
+
+  it('контрольная точка: сохранить, прочитать, стереть', () => {
+    const store = new SaveStore(memory());
+    expect(store.loadCheckpoint()).toBeNull();
+    store.saveCheckpoint({ chapter: 'prologue', beat: 'boss' });
+    expect(store.loadCheckpoint()).toEqual({ chapter: 'prologue', beat: 'boss' });
+    store.clearCheckpoint();
+    expect(store.loadCheckpoint()).toBeNull();
+  });
 });

@@ -55,6 +55,7 @@ export class PrologueScene extends LevelScene {
     private startBeat: BeatId = 'ride',
     /** Что делать, когда уличная часть пролога закончилась (переход домой). */
     private onStreetDone: () => void = () => undefined,
+    private onBeatStart: (id: BeatId) => void = () => undefined,
   ) {
     super(ctx);
     this.dialogue = new DialogueRunner({
@@ -126,6 +127,7 @@ export class PrologueScene extends LevelScene {
     this.dialogue.stop();
     this.beat = this.beats[id](this);
     this.beat.enter();
+    this.onBeatStart(id);
   }
 
   /** Проиграть диалог; confirm (Пробел/Enter) или ЛКМ пропускают реплику. */

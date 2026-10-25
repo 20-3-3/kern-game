@@ -14,6 +14,7 @@ import {
   SCRIPT_AFTER_KILL,
   SCRIPT_EXPLAIN,
   SCRIPT_RESTART,
+  RATING,
 } from '../../../data/text/prologue';
 import { addTail, setChapterJam } from '../../../systems/progress';
 import { wait, type Script } from '../../../dialogue/engine';
@@ -103,12 +104,21 @@ export class AftermathBeat implements Beat {
     s.bus.emit('music', { mode: 'calm' });
     s.bus.emit('bark', AFTER_BARKS.streamEnd);
     s.ui.orderTimer(null);
-    s.onPrologueStreetDone();
+    // Юмор-слой: заказ всё-таки доставлен, клиент оценил.
+    const r = this.killed ? RATING.kill : RATING.finish;
+    s.bus.emit('push', { text: RATING.delivered });
+    s.ui.rating(RATING.client, r.stars, RATING.tip, r.review);
+    s.bus.emit('sfx', { id: 'push' });
   }
 
   update(dt: number, f: InputFrame): void {
     const s = this.s;
     this.phaseTime += dt;
+    if (this.phase === 'outro' && this.phaseTime > 6.5 && this.phaseTime - dt <= 6.5) {
+      s.ui.hideRating();
+      s.bus.emit('push', { text: this.killed ? RATING.newRating.kill : RATING.newRating.finish });
+    }
+    if (this.phase === 'outro' && this.phaseTime > 9 && this.phaseTime - dt <= 9) s.onPrologueStreetDone();
     s.nikaNpc().update(dt);
     const dr = s.druzhinnikNpc();
     dr.update(dt);
