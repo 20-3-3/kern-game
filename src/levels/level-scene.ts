@@ -98,6 +98,12 @@ export abstract class LevelScene implements GameScene {
   /** Обновить визуал уровня (враги, эффекты, игрок). */
   protected abstract renderWorld(alpha: number, frameDt: number): void;
 
+  /** Отладка: перенести Лёву в точку. */
+  debugTeleport(x: number, z: number, yaw = Math.PI): void {
+    this.controller.teleport(vec3(x, 0.05, z), yaw);
+    this.cam.yaw = yaw;
+  }
+
   dispose(): void {
     this.ctx.renderer.clearScene();
     this.physics?.dispose();

@@ -8,7 +8,7 @@ import { EventBus } from './core/events';
 import type { GameEvents } from './core/game-events';
 import type { GameContext } from './core/context';
 import { Renderer } from './render/renderer';
-import { SandboxScene } from './levels/sandbox';
+import { PrologueScene } from './levels/prologue/prologue-scene';
 import { DEFAULT_MOUSE_SENSITIVITY } from './data/controls';
 
 const boot = async () => {
@@ -43,7 +43,9 @@ const boot = async () => {
   };
 
   canvas.addEventListener('click', () => input.requestPointerLock());
-  await scenes.switchTo(new SandboxScene(ctx));
+  // Отладка: ?debug открывает доступ к контексту из консоли браузера.
+  if (new URLSearchParams(location.search).has('debug')) (window as unknown as { kern: GameContext }).kern = ctx;
+  await scenes.switchTo(new PrologueScene(ctx));
   loop.start();
 };
 
