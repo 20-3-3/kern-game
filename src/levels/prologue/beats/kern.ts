@@ -8,11 +8,13 @@ import type { Beat, PrologueScene } from '../prologue-scene';
 import { Arena } from '../../../combat/arena';
 import { KERN_BARKS, KERN_HINTS, KERN_OBJECTIVES, SCRIPT_MEET, SCRIPT_NIKA } from '../../../data/text/prologue';
 import { PROLOGUE_ARENA } from '../../../data/levels/prologue-arena';
+import { KernCombat } from '../kern-combat';
 
 type Phase = 'approach' | 'meet' | 'wave' | 'nika' | 'down' | 'done';
 
 export class KernBeat implements Beat {
   private arena!: Arena;
+  private kc: KernCombat | null = null;
   private phase: Phase = 'approach';
   private phaseTime = 0;
   private wave = 0;
@@ -32,7 +34,6 @@ export class KernBeat implements Beat {
     s.controller.teleport(vec3(0.5, 0.05, PROLOGUE_ARENA.approachStart), Math.PI);
     s.cam.yaw = Math.PI;
     s.ctx.hud.show(false);
-    s.ctx.hud.setKernMode(false);
     s.ui.objective(KERN_OBJECTIVES.approach);
     s.city.coldLight.intensity = 45;
     const dr = s.druzhinnikNpc();
@@ -98,6 +99,7 @@ export class KernBeat implements Beat {
     s.cutCam = null;
     s.player.controllable = true;
     s.ctx.hud.show(true);
+    this.kc ??= new KernCombat(s, this.arena);
     s.ui.objective(KERN_OBJECTIVES.echoes);
     const spots = PROLOGUE_ARENA.waves[i];
     spots.forEach((p: Vec3, k: number) => {
@@ -159,7 +161,7 @@ export class KernBeat implements Beat {
         s.movePlayer(dt, f, null);
         break;
       case 'wave':
-        this.arena.update(dt, f);
+        this.arena.update(dt, this.kc ? this.kc.update(dt, f, true) : f);
         this.waveHints(dt);
         if (s.player.action === 'down') {
           this.setPhase('down');
@@ -195,14 +197,15 @@ export class KernBeat implements Beat {
   render(alpha: number, frameDt: number): void {
     const s = this.s;
     s.playerView.update(s.player, alpha, frameDt, this.arena.playerVisual());
-    s.playerView.setGlow(0.3 + Math.sin(s.time * 3) * 0.1);
     this.arena.render(alpha, frameDt);
+    this.kc?.render(frameDt);
     s.druzhinnikNpc().render();
     s.nikaNpc().render();
   }
 
   exit(): void {
     const s = this.s;
+    this.kc?.dispose();
     this.arena.dispose();
     s.ctx.hud.lock(null, s.ctx.renderer.camera);
   }

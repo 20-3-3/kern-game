@@ -90,7 +90,7 @@ export class PlayerCombat {
     const out: CombatFrame = { hits: [], actions: [], throwTarget: null };
     this.clock += dt;
     const p = this.p;
-    if (this.mode === 'none' || !p.controllable || p.action === 'down') {
+    if (this.mode === 'none' || !p.controllable || p.action === 'down' || p.action === 'cast') {
       this.reset();
       return out;
     }

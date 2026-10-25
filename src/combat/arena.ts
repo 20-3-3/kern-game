@@ -46,6 +46,9 @@ export class Arena {
   /** Вызывается, когда враг выбыл. */
   onDefeated: (f: Fighter) => void = () => undefined;
   private tmp = new THREE.Vector3();
+  /** Время «каста» (Аккорд, Последняя нота): Лёва стоит на месте. */
+  castTime = -1;
+  private castDur = 0;
 
   constructor(private s: LevelScene) {
     this.combat = new PlayerCombat(s.player);
@@ -103,6 +106,14 @@ export class Arena {
       s.cam.kick(0.8);
     }
     for (const h of res.hits) this.applyPlayerHit(h);
+
+    if (this.castTime >= 0) {
+      this.castTime += dt;
+      if (this.castTime >= this.castDur) {
+        this.castTime = -1;
+        if (p.action === 'cast') s.controller.setAction('idle');
+      }
+    }
 
     // Движение Лёвы с учётом боя.
     const c = this.combat;
@@ -203,14 +214,47 @@ export class Arena {
       }
       case 'dodged':
         this.bus.emit('sfx', { id: 'dodge', pos });
+        this.bus.emit('perfectDodge', { pos });
         break;
     }
     return result;
   }
 
+  /** Лёва замирает на время сильного приёма. */
+  cast(duration: number): void {
+    this.castTime = 0;
+    this.castDur = duration;
+    this.combat.reset();
+    this.s.controller.setAction('cast');
+  }
+
+  /** Удар по области: всех бойцов в радиусе. Возвращает число задетых. */
+  areaBlast(center: Vec3, radius: number, damage: number): number {
+    let n = 0;
+    for (const fi of this.fighters) {
+      if (!isAlive(fi)) continue;
+      const dx = fi.pos.x - center.x;
+      const dz = fi.pos.z - center.z;
+      const d = Math.hypot(dx, dz);
+      if (d > radius + fi.def.radius) continue;
+      n++;
+      this.applyPlayerHit({
+        target: fi.id,
+        damage,
+        kind: 'accord',
+        knockback: 4,
+        stagger: 1,
+        dir: { x: dx / (d || 1), z: dz / (d || 1) },
+        attack: 'accord',
+      });
+    }
+    return n;
+  }
+
   /** Поза Лёвы для отображения (удар, блок, бросок). */
   playerVisual(): { swing?: { style: import('../render/characters').SwingStyle; t: number }; block?: number } {
     const c = this.combat;
+    if (this.castTime >= 0) return { swing: { style: 'slam', t: Math.min(1, this.castTime / Math.max(0.1, this.castDur)) } };
     if (c.throwTime >= 0) return { swing: { style: 'slam', t: 0.3 + c.throwTime / 0.6 * 0.7 } };
     const a = c.current;
     if (a) return { swing: { style: a.style, t: c.swingT } };

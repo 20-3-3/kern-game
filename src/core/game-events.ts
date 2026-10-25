@@ -24,6 +24,8 @@ export interface GameEvents {
   playerHurt: { damage: number; hp: number };
   playerDown: Record<string, never>;
   dash: { pos: Vec3 };
+  /** Рывок сквозь удар: удар пришёлся на неуязвимость. */
+  perfectDodge: { pos: Vec3 };
   accord: { pos: Vec3 };
   phaseBroken: { boss: string; phase: number; byAccord: boolean };
   cutoff: { boss: string; active: boolean };

@@ -14,6 +14,8 @@ import { DRUZHINNIK, NIKA } from '../../data/characters';
 import { RIDE } from '../../data/levels/prologue-ride';
 import { DialogueRunner, type Script } from '../../dialogue/engine';
 import type { GameContext } from '../../core/context';
+import { KernSystems } from '../../systems/kern-systems';
+import { Fx } from '../../render/fx';
 
 export interface Beat {
   enter(): void;
@@ -36,6 +38,8 @@ export class PrologueScene extends LevelScene {
   private beat: Beat | null = null;
   private pendingBeat: BeatId | null = null;
   private focus = new THREE.Vector3();
+  kernSys!: KernSystems;
+  fx!: Fx;
   private druzhinnik: Npc | null = null;
   private nika: Npc | null = null;
 
@@ -99,6 +103,8 @@ export class PrologueScene extends LevelScene {
 
   override async load(): Promise<void> {
     await super.load();
+    this.kernSys = new KernSystems(this.ctx.bus, () => this.player.id);
+    this.fx = new Fx(this.scene);
     this.setBeat(this.startBeat);
   }
 
@@ -131,6 +137,7 @@ export class PrologueScene extends LevelScene {
 
   protected renderWorld(alpha: number, frameDt: number): void {
     this.beat?.render(alpha, frameDt);
+    this.fx.update(frameDt);
     const p = this.interpPlayer(alpha);
     this.focus.set(p.x, p.y, p.z);
     this.city.update(this.focus, this.time);
@@ -138,6 +145,7 @@ export class PrologueScene extends LevelScene {
 
   override dispose(): void {
     this.beat?.exit();
+    this.kernSys?.dispose();
     this.dialogue.stop();
     this.ui.clear();
     super.dispose();

@@ -89,7 +89,14 @@ export abstract class LevelScene implements GameScene {
     camera.lookAt(pose.look.x, pose.look.y, pose.look.z);
   }
 
+  /** Сколько кадров не перерисовывать («перескок» кадра при заедании). */
+  skipFrames = 0;
+
   render(alpha: number, frameDt: number): void {
+    if (this.skipFrames > 0) {
+      this.skipFrames--;
+      return;
+    }
     this.renderWorld(alpha, frameDt);
     this.applyCamera(alpha, frameDt);
     this.ctx.renderer.render();

@@ -25,6 +25,9 @@ export class UI {
   private ratingEl: HTMLElement;
   private promptEl: HTMLElement;
   private centerEl: HTMLElement;
+  private replayEl: HTMLElement;
+  private canvas: HTMLElement | null = document.getElementById('game');
+  private glitchTimer = 0;
   private hintTimer = 0;
   private subTimer = 0;
   private centerTimer = 0;
@@ -44,11 +47,17 @@ export class UI {
     this.titleEl = el('title-card', root);
     this.ratingEl = el('rating', root);
     this.flashEl = el('flash', root);
+    this.replayEl = el('replay-overlay', root);
+    this.replayEl.innerHTML = '<div class="replay-text"></div>';
     this.fadeEl = el('fade', root);
   }
 
   /** Обновление таймеров интерфейса (раз в кадр). */
   tick(dt: number): void {
+    if (this.glitchTimer > 0) {
+      this.glitchTimer -= dt;
+      if (this.glitchTimer <= 0) this.canvas?.classList.remove('glitch');
+    }
     if (this.hintTimer > 0) {
       this.hintTimer -= dt;
       if (this.hintTimer <= 0) this.hint(null);
@@ -201,6 +210,23 @@ export class UI {
     this.ratingEl.classList.remove('show');
   }
 
+  /** «Перескок» кадра при заедании: картинка дёргается и меняет цвет. */
+  glitch(strength: number): void {
+    const c = this.canvas;
+    if (!c) return;
+    c.style.setProperty('--gx', `${(Math.random() - 0.5) * 22 * strength}px`);
+    c.style.setProperty('--gy', `${(Math.random() - 0.5) * 8 * strength}px`);
+    c.classList.add('glitch');
+    this.glitchTimer = 0.07 + strength * 0.08;
+  }
+
+  /** Повтор ввода при максимальном заедании. */
+  replay(on: boolean, text = ''): void {
+    this.canvas?.classList.toggle('replay', on);
+    (this.replayEl.firstElementChild as HTMLElement).textContent = text;
+    this.replayEl.classList.toggle('show', on);
+  }
+
   /** Убрать всё сюжетное (при смене сцены). */
   clear(): void {
     this.hint(null);
@@ -212,6 +238,7 @@ export class UI {
     this.title(null);
     this.hideRating();
     this.centerEl.classList.remove('show');
+    this.replay(false);
     this.pushesEl.innerHTML = '';
     this.streamEl.innerHTML = '';
   }

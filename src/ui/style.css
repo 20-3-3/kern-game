@@ -370,3 +370,37 @@ kbd {
 .reticle.show { opacity: 1; }
 .reticle::after { content: ''; position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px; background: #ffd27a; border-radius: 50%; }
 .reticle-hp { position: absolute; left: -12px; top: 42px; height: 3px; width: 100%; max-width: 60px; background: #ffd27a; }
+
+/* ---------- заедание ---------- */
+
+#game.glitch {
+  transform: translate(var(--gx, 0), var(--gy, 0));
+  filter: contrast(1.5) saturate(1.8) hue-rotate(-25deg);
+}
+
+#game.replay { filter: grayscale(0.85) sepia(0.45) contrast(1.2); }
+
+.replay-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.12) 0 2px, transparent 2px 4px);
+  pointer-events: none;
+}
+
+.replay-overlay.show { opacity: 1; animation: replayFlicker 0.18s steps(2) infinite; }
+
+.replay-text {
+  position: absolute;
+  top: 18%;
+  width: 100%;
+  text-align: center;
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: 0.4em;
+  color: #ffd9a0;
+  text-shadow: 3px 0 #ff3050, -3px 0 #30c0ff;
+}
+
+@keyframes replayFlicker { from { opacity: 1; } to { opacity: 0.8; } }
