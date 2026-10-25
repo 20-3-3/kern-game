@@ -1,0 +1,50 @@
+:root {
+  --ink: #e9eef2;
+  --dim: #8fa0ab;
+  --accent: #ffb347;
+  --cold: #8fe3ff;
+  --danger: #ff5d5d;
+  --panel: rgba(10, 14, 20, 0.78);
+  --font: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #05070a;
+  color: var(--ink);
+  font-family: var(--font);
+  user-select: none;
+}
+
+#game {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+}
+
+#ui {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.loading {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #05070a;
+  font-size: 20px;
+  letter-spacing: 0.2em;
+  color: var(--dim);
+  z-index: 100;
+}
+
+.loading.hidden { display: none; }
