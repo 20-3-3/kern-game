@@ -6,27 +6,44 @@ import { FixedLoop } from './core/loop';
 import { SceneManager } from './core/scene';
 import { EventBus } from './core/events';
 import type { GameEvents } from './core/game-events';
+import type { GameContext } from './core/context';
 import { Renderer } from './render/renderer';
 import { SandboxScene } from './levels/sandbox';
+import { DEFAULT_MOUSE_SENSITIVITY } from './data/controls';
 
 const boot = async () => {
   const canvas = document.getElementById('game') as HTMLCanvasElement;
   const loadingEl = document.getElementById('loading') as HTMLDivElement;
+  const ui = document.getElementById('ui') as HTMLDivElement;
   await initRapier();
 
   const renderer = new Renderer(canvas);
   const input = new Input(canvas);
   const bus = new EventBus<GameEvents>();
   const scenes = new SceneManager((on) => loadingEl.classList.toggle('hidden', !on));
-
-  canvas.addEventListener('click', () => input.requestPointerLock());
-
   const loop = new FixedLoop({
     update: (dt) => scenes.update(dt, input.sample()),
     render: (alpha, frameDt) => scenes.render(alpha, frameDt),
   });
+  const ctx: GameContext = {
+    renderer,
+    input,
+    bus,
+    loop,
+    scenes,
+    ui,
+    settings: {
+      mouseSensitivity: DEFAULT_MOUSE_SENSITIVITY,
+      invertY: false,
+      masterVolume: 0.8,
+      musicVolume: 0.7,
+      voice: true,
+      quality: 'high',
+    },
+  };
 
-  await scenes.switchTo(new SandboxScene(renderer, bus));
+  canvas.addEventListener('click', () => input.requestPointerLock());
+  await scenes.switchTo(new SandboxScene(ctx));
   loop.start();
 };
 

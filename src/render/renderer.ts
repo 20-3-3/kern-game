@@ -1,6 +1,7 @@
 // Рендер на Three.js. Только отображение: никакой игровой логики здесь нет.
 
 import * as THREE from 'three';
+import { isSharedGeometry } from './characters';
 
 export class Renderer {
   readonly three: THREE.WebGLRenderer;
@@ -42,7 +43,7 @@ export class Renderer {
   clearScene(): void {
     this.scene.traverse((o) => {
       const mesh = o as THREE.Mesh;
-      if (mesh.geometry) mesh.geometry.dispose();
+      if (mesh.geometry && !isSharedGeometry(mesh.geometry)) mesh.geometry.dispose();
       const mat = mesh.material as THREE.Material | THREE.Material[] | undefined;
       if (Array.isArray(mat)) mat.forEach((m) => m.dispose());
       else mat?.dispose();

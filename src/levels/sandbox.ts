@@ -1,56 +1,49 @@
-// Пустая сцена для проверки каркаса: пол, свет, камера.
+// Тестовая площадка: пол, несколько стен и ящиков. Нужна для проверки контроллера.
 
 import * as THREE from 'three';
-import type { GameScene } from '../core/scene';
 import type { InputFrame } from '../core/input';
-import type { EventBus } from '../core/events';
-import type { GameEvents } from '../core/game-events';
-import type { Renderer } from '../render/renderer';
+import { LevelScene } from './level-scene';
+import { vec3 } from '../core/math';
 
-export class SandboxScene implements GameScene {
+export class SandboxScene extends LevelScene {
   readonly id = 'sandbox';
-  private t = 0;
-  private cube!: THREE.Mesh;
 
-  constructor(
-    private renderer: Renderer,
-    _bus: EventBus<GameEvents>,
-  ) {}
-
-  async load(): Promise<void> {
-    const scene = this.renderer.scene;
+  protected buildWorld(): void {
+    const scene = this.scene;
     scene.background = new THREE.Color(0x0a1018);
-    scene.fog = new THREE.FogExp2(0x0a1018, 0.03);
-    scene.add(new THREE.HemisphereLight(0x8fb4ff, 0x1a1410, 0.8));
-    const lamp = new THREE.PointLight(0xffc27a, 30, 30, 1.6);
+    scene.fog = new THREE.FogExp2(0x0a1018, 0.025);
+    scene.add(new THREE.HemisphereLight(0x8fb4ff, 0x1a1410, 0.9));
+    const lamp = new THREE.PointLight(0xffc27a, 60, 40, 1.4);
     lamp.position.set(3, 6, 2);
     scene.add(lamp);
-    const floor = new THREE.Mesh(
-      new THREE.PlaneGeometry(200, 200),
-      new THREE.MeshStandardMaterial({ color: 0x2a2f36, roughness: 0.9 }),
-    );
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({ color: 0x2a2f36, roughness: 0.9 }));
     floor.rotation.x = -Math.PI / 2;
     scene.add(floor);
-    this.cube = new THREE.Mesh(
-      new THREE.BoxGeometry(1, 1, 1),
-      new THREE.MeshStandardMaterial({ color: 0x7fd8ff, emissive: 0x113344 }),
-    );
-    this.cube.position.y = 0.5;
-    scene.add(this.cube);
-    this.renderer.camera.position.set(0, 3, 7);
-    this.renderer.camera.lookAt(0, 0.5, 0);
+    this.physics.addBox(vec3(0, -0.5, 0), vec3(100, 0.5, 100));
+    const mat = new THREE.MeshStandardMaterial({ color: 0x7a3b2e, roughness: 0.8, flatShading: true });
+    const boxes: [number, number, number, number, number, number][] = [
+      [8, 1.5, 0, 1, 1.5, 6],
+      [-6, 0.5, 5, 1, 0.5, 1],
+      [0, 2, -10, 10, 2, 1],
+      [-4, 0.25, -3, 2, 0.25, 2],
+    ];
+    for (const [x, y, z, hx, hy, hz] of boxes) {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(hx * 2, hy * 2, hz * 2), mat);
+      m.position.set(x, y, z);
+      scene.add(m);
+      this.physics.addBox(vec3(x, y, z), vec3(hx, hy, hz));
+    }
   }
 
-  update(dt: number, _input: InputFrame): void {
-    this.t += dt;
+  protected spawnPoint() {
+    return { pos: vec3(0, 0.05, 4), yaw: Math.PI };
   }
 
-  render(): void {
-    this.cube.rotation.y = this.t;
-    this.renderer.render();
+  protected tick(dt: number, f: InputFrame): void {
+    this.movePlayer(dt, f, null);
   }
 
-  dispose(): void {
-    this.renderer.clearScene();
+  protected renderWorld(alpha: number, frameDt: number): void {
+    this.playerView.update(this.player, alpha, frameDt);
   }
 }
